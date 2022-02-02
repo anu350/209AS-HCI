@@ -14,12 +14,25 @@ import { supabase } from "../lib/supabaseClient";
 import DraftNote from "./DraftNote";
 import NoteBrief from "./NoteBrief";
 
-export default function NoteList() {
+export default function NoteList(note) {
   const [notes, setNotes] = useState([]);
+  const [id, setId] = useState("");
+  const [notenumber, setNotenumber] = useState(0);
+  // let counter;
+  // const itemsRef = useRef([]);
+  // const editorRef = useRef();
+  // you can access the elements with itemsRef.current[n]
 
   useEffect(() => {
     fetchNotes().catch(console.error);
-  }, []);
+  });
+
+  const focusNote = (newid) => {
+    // console.log("infocusnote newid:", newid);
+    // console.log("infocusnote oldid:", id);
+    setId(newid);
+    // editorRef.current.doSomething(id);
+  };
 
   const fetchNotes = async () => {
     let { data: notes, error } = await supabase
@@ -31,20 +44,23 @@ export default function NoteList() {
   };
 
   const addNote = async () => {
-    console.log("call method to add note");
+    // console.log("call method to add note");
     const creation_time = new Date().toISOString();
+    setNotenumber(notenumber + 1);
+    console.log("counter", notenumber);
 
     // create new empty note -- and focus on editor side
-    let { error } = await supabase.from("notes").insert({
+    let { data, error } = await supabase.from("notes").insert({
       created_at: creation_time,
       last_edit_time: creation_time,
-      title: "",
+      title: "Untitled Note" + notenumber,
       note: "",
     }); //key vals for DB
     if (error) {
       console.log("error in addNote ", error);
     } else {
       fetchNotes().catch(console.error);
+      setId(data.id);
     }
   };
 
@@ -53,14 +69,27 @@ export default function NoteList() {
       <div style={style.noteList}>
         <button onClick={addNote}>new note</button>
         {notes.length ? (
-          notes.map((note) => <NoteBrief key={note.id} note={note} />)
+          notes.map((note, i) => (
+            <div>
+              <div>
+                <button
+                  // ref={(el) => (itemsRef.current[i] = el)}
+                  onClick={() => focusNote(note.id)}
+                >
+                  edit
+                </button>
+              </div>
+              <NoteBrief key={note.id} note={note} />
+            </div>
+          ))
         ) : (
           <span className={"h-full flex justify-center items-center"}>
             You do have any notes yet!
           </span>
         )}
       </div>
-      <DraftNote />
+      {/*******  THIS IS THE WRONG WAY TO UPDATE COMPONENT _ WILL MOST LIKELY NEED TO FIX ******/}
+      <DraftNote key={id} id={id} />
     </div>
   );
 }

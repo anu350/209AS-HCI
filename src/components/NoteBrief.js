@@ -32,15 +32,15 @@ export default function NoteBrief(props) {
     }
   };
 
-  const editNote = () => {
-    // ********** TODO: IMPLEMENT W REF coming from NoteList ***************
-    // https://stackoverflow.com/questions/42323279/react-triggering-a-component-method-from-another-component-both-belonging-in
-    console.log("selecting note to edit with id", props.note.id);
-  };
+  // const editNote = () => {
+  //   // ********** TODO: IMPLEMENT W REF coming from NoteList ***************
+  //   // https://stackoverflow.com/questions/42323279/react-triggering-a-component-method-from-another-component-both-belonging-in
+  //   console.log("selecting note to edit with id", props.note.id);
+  // };
 
   return (
     <div style={styles.notebriefContainer}>
-      <button onClick={editNote}>edit</button>
+      {/* <button onClick={editNote}>edit</button> */}
       <button onClick={deleteNote}>delete</button>
       <div style={styles.flexBriefHeader}>
         <div>

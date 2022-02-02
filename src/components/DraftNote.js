@@ -1,9 +1,6 @@
 // Note using Draft.js instead of quill
 // source: https://reactrocket.com/post/draft-js-persisting-content/
 
-// MISSING: method to update text editor if user wants to edit a different note
-// use redux to focus on note to edit
-
 import React, { Component } from "react";
 import "draft-js/dist/Draft.css";
 import debounce from "lodash/debounce";
@@ -20,17 +17,18 @@ import {
 class MyEditor extends Component {
   constructor(props) {
     super(props);
-    // this.myRef = React.createRef();
     this.id = props.id;
+    console.log("inside draftnote constructor, this.id: ", this.id);
     this.state = {};
     this.handleKeyCommand = this.handleKeyCommand.bind(this); // needed for handling bold, etc
 
-    // unnecessary when using a DB: ------------------------------------------------------------
+    // Should make this query DB instead of local: ------------------------------------------------------------
     const content = window.localStorage.getItem("content");
     if (content) {
-      this.state.editorState = EditorState.createWithContent(
-        convertFromRaw(JSON.parse(content))
-      );
+      this.state.editorState = EditorState.createEmpty();
+      // this.state.editorState = EditorState.createWithContent(
+      //   convertFromRaw(JSON.parse(content))
+      // );
     } else {
       this.state.editorState = EditorState.createEmpty();
     }
@@ -39,7 +37,7 @@ class MyEditor extends Component {
 
   // debounce enables periodic auto saving
   saveContent = debounce(async (content) => {
-    // console.log("saving note :)");
+    // console.log("saving note :^)");
     const edit_time = new Date().toISOString();
     await supabase
       .from("notes")
@@ -58,19 +56,65 @@ class MyEditor extends Component {
 
   componentDidMount() {
     // --------------------------------- This fetches from DB at load and loads it in noteeditor
+    console.log("just got into componentdidmount. this.id", this.id);
+    if (this.id) {
+      this.fetchById(this.id).then((rawContent) => {
+        try {
+          // this.id = rawContent.id;
+          console.log("CDM infetchbyid, rawContent: ", rawContent);
+          console.log("CDM infetchbyid, rawContent.title: ", rawContent.title);
+          this.title = rawContent.title;
+          if (rawContent.raw_json) {
+            this.setState({
+              editorState: EditorState.createWithContent(
+                convertFromRaw(JSON.parse(rawContent.raw_json))
+              ),
+            });
+          } else {
+            // console.log("componentfifmount if:false", rawContent);
+            this.setState({ editorState: EditorState.createEmpty() });
+          }
+        } catch (error) {
+          console.error("error in componentdidmount+fetchbyid", error);
+        }
+      });
+    }
     this.fetchTop().then((rawContent) => {
-      if (rawContent.raw_json) {
-        // console.log("componentfifmount if:true", rawContent);
+      try {
         this.id = rawContent.id;
         this.title = rawContent.title;
-        this.setState({
-          editorState: EditorState.createWithContent(
-            convertFromRaw(JSON.parse(rawContent.raw_json))
-          ),
-        });
-      } else {
-        // console.log("componentfifmount if:false", rawContent);
-        this.setState({ editorState: EditorState.createEmpty() });
+        if (rawContent.raw_json) {
+          this.setState({
+            editorState: EditorState.createWithContent(
+              convertFromRaw(JSON.parse(rawContent.raw_json))
+            ),
+          });
+        } else {
+          // console.log("componentfifmount if:false", rawContent);
+          this.setState({ editorState: EditorState.createEmpty() });
+        }
+      } catch (error) {
+        console.error("error in componentdidmount", error);
+      }
+    });
+  }
+
+  focusNote(id) {
+    this.fetchById(id).then((rawContent) => {
+      try {
+        this.id = rawContent.id;
+        this.title = rawContent.title;
+        if (rawContent.raw_json) {
+          this.setState({
+            editorState: EditorState.createWithContent(
+              convertFromRaw(JSON.parse(rawContent.raw_json))
+            ),
+          });
+        } else {
+          this.setState({ editorState: EditorState.createEmpty() });
+        }
+      } catch (error) {
+        console.error("error in focusNote", error);
       }
     });
   }
@@ -92,8 +136,10 @@ class MyEditor extends Component {
   fetchById = async (id) => {
     let { data, error } = await supabase
       .from("notes")
-      .select("note, title")
-      .match({ id: id });
+      .select("title, raw_json")
+      .match({ id: id })
+      .limit(1)
+      .single();
     // console.log("fetchById", data);
     if (error) {
       console.log("error fetchingbyID", error);
@@ -136,6 +182,7 @@ class MyEditor extends Component {
     return (
       <div style={styles2.noteEditor}>
         <div>
+          {/* <h2>{this.title ? this.title : "Untitled Note"}</h2> */}
           <h2>{this.title}</h2>
         </div>
         <div>
