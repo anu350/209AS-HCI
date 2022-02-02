@@ -54,6 +54,7 @@ class MyEditor extends Component {
       "content",
       JSON.stringify(convertToRaw(content))
     );
+
     //     fetch("/content", {
     //       method: "POST",
     //       body: JSON.stringify({
@@ -74,21 +75,29 @@ class MyEditor extends Component {
     this.setState({ editorState });
   };
 
-  //   componentDidMount() {  // --------------------------------- USE THIS to fetch content from DB at load
-  //     fetch("/content")
-  //       .then((val) => val.json())
-  //       .then((rawContent) => {
-  //         if (rawContent) {
-  //           this.setState({
-  //             editorState: EditorState.createWithContent(
-  //               convertFromRaw(rawContent)
-  //             ),
-  //           });
-  //         } else {
-  //           this.setState({ editorState: EditorState.createEmpty() });
-  //         }
-  //       });
-  //   }
+  componentDidMount() {
+    // --------------------------------- USE THIS to fetch content from DB at load
+    this.fetchSingle();
+    // if (data) {
+    // this.setState({
+    //   // editorState: EditorState.createWithContent(convertFromRaw(rawContent)),
+    //   editorState: EditorState.createEmpty(),
+    // });
+    // } else {
+    // this.setState({ editorState: EditorState.createEmpty() });
+    // }
+  }
+
+  fetchSingle = async () => {
+    let { data, error } = await supabase
+      .from("notes")
+      .select("note, title")
+      .order("last_edit_time", { ascending: false })
+      .limit(1)
+      .single();
+    console.log(data);
+    return data;
+  };
 
   handleKeyCommand(command, editorState) {
     const newState = RichUtils.handleKeyCommand(editorState, command);

@@ -18,10 +18,10 @@ class MinimalTextEditor extends Component {
     this.formats = ["size", "bold", "italic", "underline", "bullet"];
     this.placeholder = "placeholder text";
     this.state = {
-      comments: "",
+      comments: "", // to make changes to the editor
     };
     this.rteChange = this.rteChange.bind(this);
-    this.currentText = "";
+    this.currentText = ""; // to update the one in the database
   }
 
   rteChange = (content, delta, source, editor) => {

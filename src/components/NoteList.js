@@ -36,7 +36,20 @@ export default function NoteList() {
 
   const addNote = async () => {
     console.log("call method to add note");
+    const creation_time = new Date().toISOString();
+
     // create new empty note -- and focus on editor side
+    let { error } = await supabase.from("notes").insert({
+      created_at: creation_time,
+      last_edit_time: creation_time,
+      title: "",
+      note: "",
+    }); //key vals for DB
+    if (error) {
+      console.log("error in addNote ", error);
+    } else {
+      fetchNotes().catch(console.error);
+    }
   };
 
   return (
@@ -58,7 +71,7 @@ export default function NoteList() {
           ))
         ) : (
           <span className={"h-full flex justify-center items-center"}>
-            You do have any tasks yet!
+            You do have any notes yet!
           </span>
         )}
       </div>
