@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "react-quill/dist/quill.bubble.css";
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from "../lib/supabaseClient";
 
 class MinimalTextEditor extends Component {
   constructor(props) {
@@ -15,20 +15,13 @@ class MinimalTextEditor extends Component {
         [{ list: "bullet" }],
       ],
     };
-
     this.formats = ["size", "bold", "italic", "underline", "bullet"];
-
+    this.placeholder = "placeholder text";
     this.state = {
       comments: "",
     };
-
     this.rteChange = this.rteChange.bind(this);
-
     this.currentText = "";
-
-    this.supabaseUrl = process.env.REACT_APP_SUPABASE_URL
-    this.supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY
-    this.supabase = createClient(this.supabaseUrl, this.supabaseAnonKey)
   }
 
   rteChange = (content, delta, source, editor) => {
@@ -40,43 +33,34 @@ class MinimalTextEditor extends Component {
 
   saveText = () => {
     this.add_note(this.currentText);
-    alert('Saved!');
-  }
+    alert("Saved!");
+  };
 
   add_note = async (input) => {
-    await this.supabase
-      .from('notes')
-      .insert([
-        { note: input}
-      ])
-  }
+    await supabase.from("notes").insert([{ note: input }]);
+  };
 
   delete_note = async () => {
-    await this.supabase
-    .from('notes')
-    .delete()
-    .match({ id: 1})
-  }
+    await supabase.from("notes").delete().match({ id: 1 });
+  };
 
   fetch_note = async () => {
-    await this.supabase
-      .from('notes')
-      .select('note')
-      .then(console.log)
-  }
+    await supabase.from("notes").select("note").then(console.log);
+  };
 
   render() {
     return (
       <div>
         <ReactQuill
-          theme="snow"
+          theme="bubble"
           modules={this.modules}
           formats={this.formats}
           onChange={this.rteChange}
           value={this.state.comments || ""}
+          placeholder={this.placeholder}
+          style={{}}
         />
         <button onClick={this.saveText}>Save</button>
-
       </div>
     );
   }
