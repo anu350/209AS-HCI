@@ -1,0 +1,125 @@
+.sideNav {
+    height: 100%;
+    width: 200px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #8bd4f8;
+    overflow-x: hidden;
+    justify-content: center;
+}
+
+/* Side navigation links */
+.sideNav a {
+    color: black;
+    padding: 15px;
+    text-decoration: none;
+    display: block;
+}
+
+/* Change color on hover */
+.sideNav a:hover {
+    background-color: #2FDE9D;
+    color: black;
+}
+
+.title{
+    font-size: 25px;
+    display: flex;
+    justify-content: center;
+}
+
+.newN {
+    display: flex;
+    justify-content: left;
+}
+
+.newNoteButton {
+    font-family: "Roboto", sans-serif;
+    text-transform: uppercase;
+    outline: 0;
+    background: #2FDE9D;
+    width: 40px;
+    border: 0;
+    padding: 8px;
+    border-radius: 30px;
+    align-items: center;
+    position: fixed;
+    left: 10px;
+    bottom: 10px;
+}
+
+.newNoteButton:hover {
+background-color: #ddd;
+color: black;
+}
+
+/* DELETE NOTE BUTTON */
+.deleteNoteButton {
+    font-family: "Roboto", sans-serif;
+    text-transform: uppercase;
+    outline: 0;
+    background: #2FDE9D;
+    width: 40px;
+    border: 0;
+    padding: 8px;
+    border-radius: 30px;
+    align-items: center;
+    position: fixed;
+    left: 150px;
+    bottom: 10px;
+}
+
+.deleteNoteButton:hover {
+background-color: #ddd;
+color: black;
+}
+
+
+/* FORM STUFF */
+.windowPopup {
+    position: relative;
+    text-align: center;
+    width: 100%;
+  }
+  
+.formPopup {
+    display: none;
+    position: fixed;
+    left: 45%;
+    top: 5%;
+    transform: translate(-50%, 5%);
+    border: 3px solid #999999;
+    z-index: 9;
+ }
+.formContainer {
+    max-width: 300px;
+    padding: 20px;
+    background-color: #fff;
+}
+.formContainer input[type=text] {
+    width: 80%;
+    padding: 15px;
+    margin: 5px 0 20px 0;
+    border: none;
+    background: #eee;
+}
+
+  .formContainer .btn {
+    padding: 12px 20px;
+    border: none;
+    background-color: #14a314;
+    color: #fff;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 15px;
+    opacity: 0.8;
+  }
+  .formContainer .cancel {
+    background-color: #3b88bb;
+  }
+  .formContainer .btn:hover,
+  .openButton:hover {
+    opacity: 1;
+  }

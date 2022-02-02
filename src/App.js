@@ -1,13 +1,18 @@
 import "./App.css";
 // import RichTextEditor from "./components/RichNote";
 import MinimalTextEditor from "./components/MinimalNote";
+//import SideNav from "./components/SideNav";
+
 
 function App() {
   return (
     <div className="App">
-      <h1>barebones text entry</h1>
-      {/* <RichTextEditor /> */}
+      {/*<SideNav />*/}
+
+      <h1>Text Entry</h1>
+        {/* <RichTextEditor /> */}
       <MinimalTextEditor />
+      
     </div>
   );
 }
