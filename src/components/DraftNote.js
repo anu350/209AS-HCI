@@ -2,6 +2,7 @@
 // source: https://reactrocket.com/post/draft-js-persisting-content/
 
 // MISSING: method to update text editor if user wants to edit a different note
+// use redux to focus on note to edit
 
 import React, { Component } from "react";
 import "draft-js/dist/Draft.css";
@@ -19,6 +20,8 @@ import {
 class MyEditor extends Component {
   constructor(props) {
     super(props);
+    // this.myRef = React.createRef();
+    this.id = props.id;
     this.state = {};
     this.handleKeyCommand = this.handleKeyCommand.bind(this); // needed for handling bold, etc
 
@@ -34,68 +37,67 @@ class MyEditor extends Component {
     // end unnecessary ------------------------------------------------------------------------
   }
 
-  saveText = () => {
-    this.add_note(this.currentText);
-    alert("Saved!");
-  };
-
-  // USED FOR UPDATING EXISTING NOTE
-  save_note = async (input) => {
-    const creation_time = new Date().toISOString();
+  // debounce enables periodic auto saving
+  saveContent = debounce(async (content) => {
+    // console.log("saving note :)");
+    const edit_time = new Date().toISOString();
     await supabase
       .from("notes")
-      .update([{ note: input, edited_at: creation_time }])
-      .match({ id: "e4c587cf-080d-4fec-aa67-3aa6af9541a3" });
-  };
-
-  // USE THIS TO SAVE CONTENT --> ****** TODO: ****** TIMESTAMP+SAVE TO DATABASE
-  saveContent = debounce((content) => {
-    window.localStorage.setItem(
-      "content",
-      JSON.stringify(convertToRaw(content))
-    );
-
-    //     fetch("/content", {
-    //       method: "POST",
-    //       body: JSON.stringify({
-    //         content: convertToRaw(content),
-    //       }),
-    //       headers: new Headers({
-    //         "Content-Type": "application/json",
-    //       }),
-    //     });
-    //   }, 1000);
-  });
+      .update({
+        raw_json: JSON.stringify(convertToRaw(content)),
+        last_edit_time: edit_time,
+      })
+      .match({ id: this.id });
+  }, 1000); // this is the period in ms
 
   onChange = (editorState) => {
     const contentState = editorState.getCurrentContent();
-    console.log("content state", convertToRaw(contentState));
-    this.save_note(contentState);
     this.saveContent(contentState);
     this.setState({ editorState });
   };
 
   componentDidMount() {
-    // --------------------------------- USE THIS to fetch content from DB at load
-    this.fetchSingle();
-    // if (data) {
-    // this.setState({
-    //   // editorState: EditorState.createWithContent(convertFromRaw(rawContent)),
-    //   editorState: EditorState.createEmpty(),
-    // });
-    // } else {
-    // this.setState({ editorState: EditorState.createEmpty() });
-    // }
+    // --------------------------------- This fetches from DB at load and loads it in noteeditor
+    this.fetchTop().then((rawContent) => {
+      if (rawContent.raw_json) {
+        // console.log("componentfifmount if:true", rawContent);
+        this.id = rawContent.id;
+        this.title = rawContent.title;
+        this.setState({
+          editorState: EditorState.createWithContent(
+            convertFromRaw(JSON.parse(rawContent.raw_json))
+          ),
+        });
+      } else {
+        // console.log("componentfifmount if:false", rawContent);
+        this.setState({ editorState: EditorState.createEmpty() });
+      }
+    });
   }
 
-  fetchSingle = async () => {
+  fetchTop = async () => {
     let { data, error } = await supabase
       .from("notes")
-      .select("note, title")
+      .select("id, title, raw_json")
       .order("last_edit_time", { ascending: false })
       .limit(1)
       .single();
-    console.log(data);
+    // console.log("fetchsingle", data);
+    if (error) {
+      console.log("error fetchTop", error);
+    }
+    return data;
+  };
+
+  fetchById = async (id) => {
+    let { data, error } = await supabase
+      .from("notes")
+      .select("note, title")
+      .match({ id: id });
+    // console.log("fetchById", data);
+    if (error) {
+      console.log("error fetchingbyID", error);
+    }
     return data;
   };
 
@@ -134,7 +136,7 @@ class MyEditor extends Component {
     return (
       <div style={styles2.noteEditor}>
         <div>
-          <h2>Note Title</h2>
+          <h2>{this.title}</h2>
         </div>
         <div>
           <button onClick={this._onBoldClick.bind(this)}>Bold</button>
@@ -150,7 +152,6 @@ class MyEditor extends Component {
             placeholder="Enter some text..."
           />
         </div>
-        {/* <button onClick={this.saveContent}>Save</button> */}
       </div>
     );
   }
@@ -175,6 +176,14 @@ const styles2 = {
   button: {
     marginTop: 10,
     textAlign: "center",
+  },
+  notetitle: {
+    border: "none",
+    display: "inline",
+    fontFamily: "inherit",
+    fontSize: "inherit",
+    padding: "none",
+    width: "auto",
   },
 };
 
