@@ -1,7 +1,7 @@
 // Note using Draft.js instead of quill
 // source: https://reactrocket.com/post/draft-js-persisting-content/
 
-// implement further styles -> headers, links? anything fast from draft.js
+// MISSING: method to update text editor if user wants to edit a different note
 
 import React, { Component } from "react";
 import "draft-js/dist/Draft.css";
