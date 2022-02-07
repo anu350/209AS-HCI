@@ -10,8 +10,10 @@ create table tags (
 create table notes (
   id uuid DEFAULT uuid_generate_v4 (),
   created_at timestamp with time zone,
+  last_edit_time timestamp with time zone,
   note text,
   title text,
+  raw_json json,
   -- tags_id int8[] references tags.id,
 
   primary key (id)

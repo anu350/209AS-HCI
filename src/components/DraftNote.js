@@ -1,7 +1,7 @@
 // Note using Draft.js instead of quill
 // source: https://reactrocket.com/post/draft-js-persisting-content/
 
-import React, { Component } from "react";
+import React, { useRef, useEffect, Component } from "react";
 import "draft-js/dist/Draft.css";
 import debounce from "lodash/debounce";
 import { supabase } from "../lib/supabaseClient";
@@ -9,44 +9,114 @@ import { supabase } from "../lib/supabaseClient";
 import {
   Editor,
   EditorState,
+  ContentState,
   RichUtils,
   convertToRaw,
   convertFromRaw,
+  Modifier,
 } from "draft-js";
 
+const EditableElement = (props) => {
+  const { onChange } = props;
+  const element = useRef();
+  let elements = React.Children.toArray(props.children);
+  if (elements.length > 1) {
+    throw Error("Can't have more than one child");
+  }
+  const onMouseUp = () => {
+    const value = element.current?.value || element.current?.innerText;
+    onChange(value);
+  };
+  useEffect(() => {
+    const value = element.current?.value || element.current?.innerText;
+    onChange(value);
+  });
+  elements = React.cloneElement(elements[0], {
+    contentEditable: true,
+    suppressContentEditableWarning: true,
+    ref: element,
+    onKeyUp: onMouseUp,
+  });
+  return elements;
+};
 class MyEditor extends Component {
   constructor(props) {
+    /**
+     * FETCH IS DONE IN PARENT: props should hold json of entire query response (including title + rawjson)
+     */
     super(props);
-    this.id = props.id;
-    console.log("inside draftnote constructor, this.id: ", this.id);
-    this.state = {};
-    this.handleKeyCommand = this.handleKeyCommand.bind(this); // needed for handling bold, etc
+    // this.state = {};
+    const note = this.props.note;
 
-    // Should make this query DB instead of local: ------------------------------------------------------------
-    const content = window.localStorage.getItem("content");
-    if (content) {
-      this.state.editorState = EditorState.createEmpty();
-      // this.state.editorState = EditorState.createWithContent(
-      //   convertFromRaw(JSON.parse(content))
-      // );
-    } else {
-      this.state.editorState = EditorState.createEmpty();
-    }
-    // end unnecessary ------------------------------------------------------------------------
+    const editorState = this.createContent(note);
+    this.state = { editorState: editorState };
+
+    this.domEditor = React.createRef();
+
+    this.handleKeyCommand = this.handleKeyCommand.bind(this); // needed for handling bold, etc
   }
 
-  // debounce enables periodic auto saving
+  saveTitle = debounce(async (title) => {
+    // -------------------------- BUG: only edit_time if values have changed
+    console.log("savingTitle contetn :", title);
+
+    const edit_time = new Date().toISOString();
+    await supabase
+      .from("notes")
+      .update({
+        last_edit_time: edit_time,
+        title: title,
+      })
+      .match({ id: this.props.note.id });
+  }, 1000); // this is the period in ms
+
+  // debounce enables periodic auto saving -------------------------- BUG: only edit_time if values have changed
   saveContent = debounce(async (content) => {
-    // console.log("saving note :^)");
+    // console.log("savecontent", content);
+    // console.log("this.props.note.id", this.props.note.id);
     const edit_time = new Date().toISOString();
     await supabase
       .from("notes")
       .update({
         raw_json: JSON.stringify(convertToRaw(content)),
         last_edit_time: edit_time,
+        note: convertToRaw(content).blocks[0].text,
       })
-      .match({ id: this.id });
+      .match({ id: this.props.note.id });
+    console.log("saved note :^)");
   }, 1000); // this is the period in ms
+
+  onTitleChange = (title) => {
+    // console.log("inside ontitle change, value:", title);
+    this.saveTitle(title);
+  };
+
+  createContent(note) {
+    if (!note) {
+      const defaultContent = ContentState.createFromText(
+        "first you must add a note on the left side panel"
+      );
+      return EditorState.createWithContent(defaultContent);
+    }
+    if (!note.id) {
+      const defaultContent = ContentState.createFromText(
+        "first you must select a note on the left side panel"
+      );
+      return EditorState.createWithContent(defaultContent);
+    }
+    console.log("right before convertfromraw in create content");
+    console.log("note", note.raw_json);
+    if (note.raw_json) {
+      this.title = note.title;
+      const contentState = convertFromRaw(JSON.parse(note.raw_json));
+      const editorState = EditorState.createWithContent(contentState);
+      return EditorState.moveSelectionToEnd(editorState);
+    }
+    this.title = note.title;
+    const defaultContent = ContentState.createFromText("note is empty");
+    // change placeholder to "Start typing..."
+    return EditorState.createWithContent(defaultContent);
+  }
 
   onChange = (editorState) => {
     const contentState = editorState.getCurrentContent();
@@ -54,50 +124,19 @@ class MyEditor extends Component {
     this.setState({ editorState });
   };
 
-  componentDidMount() {
-    // --------------------------------- This fetches from DB at load and loads it in noteeditor
-    console.log("just got into componentdidmount. this.id", this.id);
-    if (this.id) {
-      this.fetchById(this.id).then((rawContent) => {
-        try {
-          // this.id = rawContent.id;
-          console.log("CDM infetchbyid, rawContent: ", rawContent);
-          console.log("CDM infetchbyid, rawContent.title: ", rawContent.title);
-          this.title = rawContent.title;
-          if (rawContent.raw_json) {
-            this.setState({
-              editorState: EditorState.createWithContent(
-                convertFromRaw(JSON.parse(rawContent.raw_json))
-              ),
-            });
-          } else {
-            // console.log("componentfifmount if:false", rawContent);
-            this.setState({ editorState: EditorState.createEmpty() });
-          }
-        } catch (error) {
-          console.error("error in componentdidmount+fetchbyid", error);
-        }
-      });
-    }
-    this.fetchTop().then((rawContent) => {
-      try {
-        this.id = rawContent.id;
-        this.title = rawContent.title;
-        if (rawContent.raw_json) {
-          this.setState({
-            editorState: EditorState.createWithContent(
-              convertFromRaw(JSON.parse(rawContent.raw_json))
-            ),
-          });
-        } else {
-          // console.log("componentfifmount if:false", rawContent);
-          this.setState({ editorState: EditorState.createEmpty() });
-        }
-      } catch (error) {
-        console.error("error in componentdidmount", error);
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.props.note.id !== prevProps.note.id) {
+      console.log("child received new note id: ", this.props.note.id);
+      if (this.props.note.raw_json) {
+        console.log(convertFromRaw(this.props.note.raw_json));
       }
-    });
+      //   this.setState({
+      //       editorState: EditorState.createWithContent(convertFromRaw(this.props.note.raw_json)),
+      //   })
+    }
   }
+
+  // componentDidMount() {}
 
   focusNote(id) {
     this.fetchById(id).then((rawContent) => {
@@ -182,22 +221,40 @@ class MyEditor extends Component {
     return (
       <div style={styles2.noteEditor}>
         <div>
-          {/* <h2>{this.title ? this.title : "Untitled Note"}</h2> */}
-          <h2>{this.title}</h2>
+          <EditableElement onChange={this.onTitleChange}>
+            <h2 contentEditable="true">{this.title}</h2>
+          </EditableElement>
         </div>
         <div>
-          <button onClick={this._onBoldClick.bind(this)}>Bold</button>
-          <button onClick={this._onItalicClick.bind(this)}>Italic</button>
-          <button onClick={this._onUnderlineClick.bind(this)}>Underline</button>
-          {/* <button onClick={this._onToggleCode.bind(this)}>Code block</button> */}
-        </div>
-        <div style={styles2.editor}>
-          <Editor
-            editorState={this.state.editorState}
-            handleKeyCommand={this.handleKeyCommand}
-            onChange={this.onChange}
-            placeholder="Enter some text..."
-          />
+          <div style={styles2.buttonBar}>
+            <button
+              style={styles2.button}
+              onClick={this._onBoldClick.bind(this)}
+            >
+              Bold
+            </button>
+            <button
+              style={styles2.button}
+              onClick={this._onItalicClick.bind(this)}
+            >
+              Italic
+            </button>
+            <button
+              style={styles2.button}
+              onClick={this._onUnderlineClick.bind(this)}
+            >
+              Underline
+            </button>
+            {/* <button onClick={this._onToggleCode.bind(this)}>Code block</button> */}
+          </div>
+          <div style={styles2.actualEditor}>
+            <Editor
+              editorState={this.state.editorState}
+              handleKeyCommand={this.handleKeyCommand}
+              onChange={this.onChange}
+              placeholder="Enter some text..."
+            />
+          </div>
         </div>
       </div>
     );
@@ -208,20 +265,39 @@ const styles2 = {
   noteEditor: {
     fontFamily: "'Helvetica', sans-serif",
     padding: 20,
-    width: "70%",
-    borderStyle: "solid",
-    borderWidth: "5px",
-    borderColor: "red",
+    // borderStyle: "solid",
+    // borderWidth: "5px",
+    // borderColor: "red",
+    flexGrow: 1,
   },
-  editor: {
-    border: "1px solid #ccc",
+  actualEditor: {
+    // border: "3px solid #eee",
+    border: "4px solid #fafafa",
     cursor: "text",
-    minHeight: 80,
+    height: "65vh",
     padding: 10,
-    width: "100%",
+    width: "90%",
+    // display: "block",
+    marginLeft: "auto",
+    marginRight: "auto",
+  },
+  buttonBar: {
+    // paddingLeft: 10,
+    height: "45px",
+    width: "90%",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    marginLeft: "auto",
+    marginRight: "auto",
+  },
+  editorContainer: {
+    display: "flex",
+    flexDirection: "column",
   },
   button: {
     marginTop: 10,
+    width: "20%",
     textAlign: "center",
   },
   notetitle: {

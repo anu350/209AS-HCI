@@ -1,14 +1,6 @@
 /**
  * The little card you see on the side.
  * This is just the container - the DB query happens in '/components/NoteList.js'
- *
- * Latest change:
- * - delete works (refers to notes by id)
- * - but needs to refresh site. -- could be automatic if we call FetchNotes() from NoteList.js
- *
- * *************** TODO:
- * - implement edit button onClick
- *
  */
 
 import React from "react";
@@ -24,30 +16,22 @@ export default function NoteBrief(props) {
   const deleteNote = async () => {
     try {
       await supabase.from("notes").delete().match({ id: props.note.id });
-      // setNotes(notes.filter((x) => x.id !== id));
       console.log("deleted note with id", props.note.id);
-      // ******* TODO: RELOAD HERE! ***********
+      props.reloadfunc(); // reloads parent
     } catch (error) {
       console.log("error deleting", error);
     }
   };
 
-  // const editNote = () => {
-  //   // ********** TODO: IMPLEMENT W REF coming from NoteList ***************
-  //   // https://stackoverflow.com/questions/42323279/react-triggering-a-component-method-from-another-component-both-belonging-in
-  //   console.log("selecting note to edit with id", props.note.id);
-  // };
-
   return (
     <div style={styles.notebriefContainer}>
-      {/* <button onClick={editNote}>edit</button> */}
       <button onClick={deleteNote}>delete</button>
       <div style={styles.flexBriefHeader}>
         <div>
           {props.note.title ? (
             <h3>{props.note.title}</h3>
           ) : (
-            <h3>Untitled Note</h3>
+            <h3>Untitled Note</h3> // should be unnecessary now that DB never saves untitled file.
           )}
         </div>
         <div style={{ marginLeft: "auto" }}>
@@ -66,8 +50,8 @@ const styles = {
     padding: 20,
     // minWidth: "20%",
     borderStyle: "solid",
-    borderWidth: "3px",
-    borderColor: "grey",
+    borderWidth: "1px",
+    borderColor: "blue",
     height: "120px",
   },
   flexBriefHeader: {

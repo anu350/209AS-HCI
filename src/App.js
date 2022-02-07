@@ -10,25 +10,40 @@ import "./App.css";
 import React from "react";
 import Container from "@mui/material/Container";
 import NoteList from "./components/NoteList";
+import TopBar from "./components/TopBar";
 
 function App() {
+  const myfunction = () => {
+    console.log("printing in App.js");
+  };
+
   return (
-    <Container>
-      <h1 style={{ color: "red" }}>notesmart</h1>
-      {/* <MinimalTextEditor /> */}
-      <div style={styles.rootContainer}>
+    // <Container maxWidth={"xl"}>
+    <div style={styles.root}>
+      <div>
+        {/* <h1 style={{ color: "red" }}>notesmart</h1> */}
+        <TopBar functionfromabove={myfunction} />
+      </div>
+      <div style={styles.noteContainer}>
         <NoteList />
       </div>
-    </Container>
+      {/* </Container> */}
+    </div>
   );
 }
 
 const styles = {
-  rootContainer: {
+  root: {
+    // minHeight: "100vh",
+    paddingLeft: 20,
+    paddingRight: 20,
+  },
+  noteContainer: {
     width: "100%",
-    borderStyle: "solid",
-    borderWidth: "5px",
-    borderColor: "red",
+    height: "88vh",
+    // borderStyle: "solid",
+    // borderWidth: "5px",
+    // borderColor: "red",
   },
 };
 
