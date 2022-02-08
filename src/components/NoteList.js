@@ -11,7 +11,7 @@ import { supabase } from "../lib/supabaseClient";
 import MyEditor from "./DraftNote";
 import NoteBrief from "./NoteBrief";
 
-export default function NoteList() {
+export default function NoteList(props) {
   const [notes, setNotes] = useState([]);
   const [currentNote, setCurrentNote] = useState({});
 
@@ -27,7 +27,7 @@ export default function NoteList() {
 
   // This is called everytime currentNote changes -- via a setCurrentNote() call
   useEffect(() => {
-    console.log("in effect of currnote: ", currentNote);
+    // console.log("in effect of currnote: ", currentNote);
     // call to rerender draftnote here
   }, [currentNote]);
 
@@ -44,10 +44,11 @@ export default function NoteList() {
   const briefClick = (clickedId) => {
     let thenote = notes.find((n) => n.id === clickedId);
     setCurrentNote(thenote);
+    props.retrieveId(clickedId);
   };
 
   const triggerReload = () => {
-    console.log("triggered reload in nodelist");
+    // console.log("triggered reload in nodelist");
     fetchNotes().catch(console.error);
     setCurrentNote(notes[0]);
   };
@@ -79,34 +80,30 @@ export default function NoteList() {
       console.log("error in addNote ", error);
     } else {
       fetchNotes().catch(console.error);
-      // let thenote = notes.find((n) => n.id === data[0].id);
-      // setCurrentNote(notes[0]);
     }
   };
 
   return (
     <div style={style.generalApp}>
-      <div style={style.leftBar}>
-        <div style={style.searchBar}>
+      <div className="leftbar-container" style={style.leftBar}>
+        <div className="searchbar-container" style={style.searchBar}>
           <button style={style.newNote} onClick={addNote}>
             +
           </button>
         </div>
-        <div style={style.noteList}>
+        <div className="notebriefscontainer" style={style.noteList}>
           {notes.length ? (
             notes.map((note) => (
-              <div>
-                <div
-                  onMouseEnter={noteHover}
-                  onMouseLeave={stopNoteHover}
-                  onClick={() => briefClick(note.id)}
-                >
-                  <NoteBrief
-                    key={note.id}
-                    note={note}
-                    reloadfunc={triggerReload}
-                  />
-                </div>
+              <div
+                onMouseEnter={noteHover}
+                onMouseLeave={stopNoteHover}
+                onClick={() => briefClick(note.id)}
+              >
+                <NoteBrief
+                  key={note.id}
+                  note={note}
+                  reloadfunc={triggerReload}
+                />
               </div>
             ))
           ) : (
@@ -116,7 +113,12 @@ export default function NoteList() {
           )}
         </div>
       </div>
-      <MyEditor note={currentNote} key={"note" + currentNote.id} />
+      {props.question}
+      <MyEditor
+        note={currentNote}
+        key={"note" + currentNote.id}
+        updatecallback={fetchNotes}
+      />
     </div>
   );
 }
@@ -127,6 +129,7 @@ const style = {
     width: "40px",
     fontSize: "26px",
     padding: "0px",
+    marginRight: "2.5px",
   },
   generalApp: {
     display: "flex",
@@ -147,12 +150,15 @@ const style = {
     display: "flex",
     flexDirection: "row-reverse",
     height: "50px",
+    alignItems: "center",
+    backgroundColor: "rgba(255,0,0,0.3)",
   },
   noteList: {
     width: "100%",
+    height: "100%",
     cursor: "pointer",
-    borderTop: "solid 1px blue",
-    borderBottom: "solid 1px blue",
+    // borderTop: "solid 1px blue",
+    // borderBottom: "solid 1px blue",
     // borderStyle: "solid",
     // borderWidth: "5px",
     // borderColor: "red",

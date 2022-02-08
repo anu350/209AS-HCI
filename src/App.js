@@ -1,33 +1,61 @@
-/** So...
- * need to connect w DB
+/**
  *
- * TODO:
- * - improve design
  */
 
 import "./App.css";
-// import MinimalTextEditor from "./components/MinimalNote";
-import React from "react";
-import Container from "@mui/material/Container";
+import React, { useState } from "react";
 import NoteList from "./components/NoteList";
 import TopBar from "./components/TopBar";
+import Settings from "./components/Settings";
+import QuestionContainer from "./components/QuestionContainer";
 
 function App() {
-  const myfunction = () => {
-    console.log("printing in App.js");
+  const [showSettings, setShowSettings] = useState(false);
+  const [questionMode, setQuestionMode] = useState(false);
+  const [currentNoteId, setCurrentNoteId] = useState("");
+
+  const togglesettings = () => {
+    console.log("open settings function called in App.js");
+    setShowSettings(!showSettings);
+    console.log("show settings: ", showSettings);
+  };
+
+  const togglequestionmode = () => {
+    if (!currentNoteId) {
+      console.log("you have to select a note first");
+      return;
+    }
+    console.log("toggled q mode in app.js");
+    setQuestionMode(!questionMode);
+    // console.log("show question: ", questionMode); // the console.log prints before the state has actually been toggled
+  };
+
+  const retrieveId = (noteid) => {
+    console.log("App.js noteid:, ", noteid);
+    setCurrentNoteId(noteid);
   };
 
   return (
-    // <Container maxWidth={"xl"}>
     <div style={styles.root}>
+      {showSettings ? (
+        <Settings
+          togglesettings={togglesettings}
+          togglequestionmode={togglequestionmode}
+        />
+      ) : null}
       <div>
-        {/* <h1 style={{ color: "red" }}>notesmart</h1> */}
-        <TopBar functionfromabove={myfunction} />
+        <TopBar
+          togglesettings={togglesettings}
+          togglequestionmode={togglequestionmode}
+        />
       </div>
-      <div style={styles.noteContainer}>
-        <NoteList />
-      </div>
-      {/* </Container> */}
+      {questionMode ? (
+        <QuestionContainer noteId={currentNoteId} />
+      ) : (
+        <div style={styles.noteContainer}>
+          <NoteList retrieveId={retrieveId} persistNoteId={currentNoteId} />
+        </div>
+      )}
     </div>
   );
 }

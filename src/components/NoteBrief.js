@@ -16,7 +16,7 @@ export default function NoteBrief(props) {
   const deleteNote = async () => {
     try {
       await supabase.from("notes").delete().match({ id: props.note.id });
-      console.log("deleted note with id", props.note.id);
+      // console.log("deleted note with id", props.note.id);
       props.reloadfunc(); // reloads parent
     } catch (error) {
       console.log("error deleting", error);

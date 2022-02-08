@@ -1,7 +1,7 @@
 // Note using Draft.js instead of quill
 // source: https://reactrocket.com/post/draft-js-persisting-content/
 
-import React, { useRef, useEffect, Component } from "react";
+import React, { Component } from "react";
 import "draft-js/dist/Draft.css";
 import debounce from "lodash/debounce";
 import { supabase } from "../lib/supabaseClient";
@@ -16,50 +16,21 @@ import {
   Modifier,
 } from "draft-js";
 
-const EditableElement = (props) => {
-  const { onChange } = props;
-  const element = useRef();
-  let elements = React.Children.toArray(props.children);
-  if (elements.length > 1) {
-    throw Error("Can't have more than one child");
-  }
-  const onMouseUp = () => {
-    const value = element.current?.value || element.current?.innerText;
-    onChange(value);
-  };
-  useEffect(() => {
-    const value = element.current?.value || element.current?.innerText;
-    onChange(value);
-  });
-  elements = React.cloneElement(elements[0], {
-    contentEditable: true,
-    suppressContentEditableWarning: true,
-    ref: element,
-    onKeyUp: onMouseUp,
-  });
-  return elements;
-};
 class MyEditor extends Component {
   constructor(props) {
     /**
      * FETCH IS DONE IN PARENT: props should hold json of entire query response (including title + rawjson)
      */
     super(props);
-    // this.state = {};
     const note = this.props.note;
-
     const editorState = this.createContent(note);
     this.state = { editorState: editorState };
-
     this.domEditor = React.createRef();
-
     this.handleKeyCommand = this.handleKeyCommand.bind(this); // needed for handling bold, etc
   }
 
   saveTitle = debounce(async (title) => {
-    // -------------------------- BUG: only edit_time if values have changed
-    console.log("savingTitle contetn :", title);
-
+    // console.log("savingTitle: ", title);
     const edit_time = new Date().toISOString();
     await supabase
       .from("notes")
@@ -68,12 +39,10 @@ class MyEditor extends Component {
         title: title,
       })
       .match({ id: this.props.note.id });
-  }, 1000); // this is the period in ms
+    this.props.updatecallback();
+  }, 1000);
 
-  // debounce enables periodic auto saving -------------------------- BUG: only edit_time if values have changed
   saveContent = debounce(async (content) => {
-    // console.log("savecontent", content);
-    // console.log("this.props.note.id", this.props.note.id);
     const edit_time = new Date().toISOString();
     await supabase
       .from("notes")
@@ -83,12 +52,13 @@ class MyEditor extends Component {
         note: convertToRaw(content).blocks[0].text,
       })
       .match({ id: this.props.note.id });
-    console.log("saved note :^)");
-  }, 1000); // this is the period in ms
+    console.log("saved note contents");
+    this.props.updatecallback();
+  }, 1000);
 
   onTitleChange = (title) => {
-    // console.log("inside ontitle change, value:", title);
-    this.saveTitle(title);
+    console.log("inside ontitle change, value:", title.target.value);
+    this.saveTitle(title.target.value);
   };
 
   createContent(note) {
@@ -104,8 +74,8 @@ class MyEditor extends Component {
       );
       return EditorState.createWithContent(defaultContent);
     }
-    console.log("right before convertfromraw in create content");
-    console.log("note", note.raw_json);
+    // console.log("right before convertfromraw in create content");
+    // console.log("note", note.raw_json);
     if (note.raw_json) {
       this.title = note.title;
       const contentState = convertFromRaw(JSON.parse(note.raw_json));
@@ -126,13 +96,10 @@ class MyEditor extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.props.note.id !== prevProps.note.id) {
-      console.log("child received new note id: ", this.props.note.id);
+      // console.log("child received new note id: ", this.props.note.id);
       if (this.props.note.raw_json) {
         console.log(convertFromRaw(this.props.note.raw_json));
       }
-      //   this.setState({
-      //       editorState: EditorState.createWithContent(convertFromRaw(this.props.note.raw_json)),
-      //   })
     }
   }
 
@@ -165,7 +132,6 @@ class MyEditor extends Component {
       .order("last_edit_time", { ascending: false })
       .limit(1)
       .single();
-    // console.log("fetchsingle", data);
     if (error) {
       console.log("error fetchTop", error);
     }
@@ -179,7 +145,6 @@ class MyEditor extends Component {
       .match({ id: id })
       .limit(1)
       .single();
-    // console.log("fetchById", data);
     if (error) {
       console.log("error fetchingbyID", error);
     }
@@ -221,9 +186,14 @@ class MyEditor extends Component {
     return (
       <div style={styles2.noteEditor}>
         <div>
-          <EditableElement onChange={this.onTitleChange}>
-            <h2 contentEditable="true">{this.title}</h2>
-          </EditableElement>
+          <form>
+            <input
+              style={styles2.notetitle}
+              type="text"
+              onChange={this.onTitleChange}
+              placeholder={this.title}
+            />
+          </form>
         </div>
         <div>
           <div style={styles2.buttonBar}>
@@ -263,6 +233,7 @@ class MyEditor extends Component {
 
 const styles2 = {
   noteEditor: {
+    zIndex: 900,
     fontFamily: "'Helvetica', sans-serif",
     padding: 20,
     // borderStyle: "solid",
@@ -304,9 +275,11 @@ const styles2 = {
     border: "none",
     display: "inline",
     fontFamily: "inherit",
-    fontSize: "inherit",
+    fontSize: "30px",
+    fontWeight: "bold",
     padding: "none",
-    width: "auto",
+    width: "100%",
+    marginBottom: "15px",
   },
 };
 
