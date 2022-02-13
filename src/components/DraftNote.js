@@ -13,7 +13,7 @@ import {
   RichUtils,
   convertToRaw,
   convertFromRaw,
-  Modifier,
+  // Modifier,
 } from "draft-js";
 
 class MyEditor extends Component {
@@ -25,7 +25,7 @@ class MyEditor extends Component {
     const note = this.props.note;
     const editorState = this.createContent(note);
     this.state = { editorState: editorState };
-    this.domEditor = React.createRef();
+    // this.domEditor = React.createRef();
     this.handleKeyCommand = this.handleKeyCommand.bind(this); // needed for handling bold, etc
   }
 
@@ -49,7 +49,7 @@ class MyEditor extends Component {
       .update({
         raw_json: JSON.stringify(convertToRaw(content)),
         last_edit_time: edit_time,
-        note: convertToRaw(content).blocks[0].text,
+        note: convertToRaw(content).blocks[0].text.substring(0, 65),
       })
       .match({ id: this.props.note.id });
     console.log("saved note contents");
@@ -104,52 +104,6 @@ class MyEditor extends Component {
   }
 
   // componentDidMount() {}
-
-  focusNote(id) {
-    this.fetchById(id).then((rawContent) => {
-      try {
-        this.id = rawContent.id;
-        this.title = rawContent.title;
-        if (rawContent.raw_json) {
-          this.setState({
-            editorState: EditorState.createWithContent(
-              convertFromRaw(JSON.parse(rawContent.raw_json))
-            ),
-          });
-        } else {
-          this.setState({ editorState: EditorState.createEmpty() });
-        }
-      } catch (error) {
-        console.error("error in focusNote", error);
-      }
-    });
-  }
-
-  fetchTop = async () => {
-    let { data, error } = await supabase
-      .from("notes")
-      .select("id, title, raw_json")
-      .order("last_edit_time", { ascending: false })
-      .limit(1)
-      .single();
-    if (error) {
-      console.log("error fetchTop", error);
-    }
-    return data;
-  };
-
-  fetchById = async (id) => {
-    let { data, error } = await supabase
-      .from("notes")
-      .select("title, raw_json")
-      .match({ id: id })
-      .limit(1)
-      .single();
-    if (error) {
-      console.log("error fetchingbyID", error);
-    }
-    return data;
-  };
 
   handleKeyCommand(command, editorState) {
     const newState = RichUtils.handleKeyCommand(editorState, command);

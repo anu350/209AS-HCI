@@ -1,5 +1,11 @@
 /**
+ * TODO:
  *
+ * In toggle question mode:
+ * - If clicks Q before selecting note:
+ * ---- pop-up message saying you have to select a note first
+ * - check note completion
+ * ---- if too small, display pop-up message saying it is too short
  */
 
 import "./App.css";
@@ -8,11 +14,13 @@ import NoteList from "./components/NoteList";
 import TopBar from "./components/TopBar";
 import Settings from "./components/Settings";
 import QuestionContainer from "./components/QuestionContainer";
+import QEditor from "./components/QEditor";
 
 function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [questionMode, setQuestionMode] = useState(false);
   const [currentNoteId, setCurrentNoteId] = useState("");
+  const [currentFullNote, setCurrentFullNote] = useState({});
 
   const togglesettings = () => {
     console.log("open settings function called in App.js");
@@ -21,18 +29,28 @@ function App() {
   };
 
   const togglequestionmode = () => {
+    // ADD ------------------------------------
+    // checks to verify note completeness so question gen will work
     if (!currentNoteId) {
-      console.log("you have to select a note first");
+      console.log("you have to select a note first"); // ---------- make this a pop up message
       return;
+    }
+    if (questionMode) {
+      document.body.style.backgroundColor = "white";
+    } else {
+      document.body.style.backgroundColor = "lightgray";
     }
     console.log("toggled q mode in app.js");
     setQuestionMode(!questionMode);
-    // console.log("show question: ", questionMode); // the console.log prints before the state has actually been toggled
   };
 
   const retrieveId = (noteid) => {
     console.log("App.js noteid:, ", noteid);
     setCurrentNoteId(noteid);
+  };
+  const retrieveFullNote = (fullnote) => {
+    console.log("App.js fullnote:, ", fullnote);
+    setCurrentFullNote(fullnote);
   };
 
   return (
@@ -50,10 +68,29 @@ function App() {
         />
       </div>
       {questionMode ? (
-        <QuestionContainer noteId={currentNoteId} />
+        <div style={styles.qmode}>
+          <div style={styles.qeditor}>
+            <QEditor
+              style={styles.qeditor}
+              note={currentFullNote}
+              key={"note" + currentNoteId}
+            />
+          </div>
+          <div style={styles.qcontainer}>
+            <QuestionContainer
+              noteId={currentNoteId}
+              fullnote={currentFullNote}
+            />
+          </div>
+        </div>
       ) : (
         <div style={styles.noteContainer}>
-          <NoteList retrieveId={retrieveId} persistNoteId={currentNoteId} />
+          <NoteList
+            retrieveId={retrieveId}
+            retrieveFullNote={retrieveFullNote}
+            persistNoteId={currentNoteId}
+            persistFullNote={currentFullNote}
+          />
         </div>
       )}
     </div>
@@ -61,17 +98,23 @@ function App() {
 }
 
 const styles = {
+  qeditor: {
+    flex: "1 1 0",
+  },
+  qcontainer: {
+    flex: "1 1 0",
+  },
+  qmode: {
+    display: "flex",
+    flexMode: "row",
+  },
   root: {
-    // minHeight: "100vh",
-    paddingLeft: 20,
-    paddingRight: 20,
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   noteContainer: {
     width: "100%",
     height: "88vh",
-    // borderStyle: "solid",
-    // borderWidth: "5px",
-    // borderColor: "red",
   },
 };
 

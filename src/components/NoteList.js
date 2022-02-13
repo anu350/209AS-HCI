@@ -18,7 +18,14 @@ export default function NoteList(props) {
   // This is called the first time component loads!
   useEffect(() => {
     fetchNotes();
-    if (notes.length) {
+
+    if (props.persistFullNote) {
+      console.log(
+        "in notelist-> useeffect -> persistfullnote",
+        props.persistFullNote
+      );
+      setCurrentNote(props.persistFullNote);
+    } else if (notes.length) {
       console.log("notelist/usefect notes", notes);
       setCurrentNote(notes[0]);
       console.log("currentnote: ", currentNote);
@@ -45,6 +52,7 @@ export default function NoteList(props) {
     let thenote = notes.find((n) => n.id === clickedId);
     setCurrentNote(thenote);
     props.retrieveId(clickedId);
+    props.retrieveFullNote(thenote);
   };
 
   const triggerReload = () => {
@@ -69,7 +77,7 @@ export default function NoteList(props) {
   const addNote = async () => {
     const creation_time = new Date().toISOString();
     // create new empty note -- reloads side notelist + and changes currentNote to the newnote
-    let { data, error } = await supabase.from("notes").insert({
+    let { error } = await supabase.from("notes").insert({
       created_at: creation_time,
       last_edit_time: creation_time,
       title: "Untitled Note",
@@ -107,9 +115,7 @@ export default function NoteList(props) {
               </div>
             ))
           ) : (
-            <span className={"h-full flex justify-center items-center"}>
-              You don't have any notes yet!
-            </span>
+            <span>You don't have any notes yet!</span>
           )}
         </div>
       </div>

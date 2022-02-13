@@ -23,6 +23,7 @@ create table questions (
   id uuid DEFAULT uuid_generate_v4 (),
     created_at timestamp with time zone,
     question text,
+    related_note uuid references notes.id,
 
     primary key (id)
 );

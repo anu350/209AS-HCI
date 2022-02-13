@@ -43,6 +43,23 @@ NOTES = {
     },
 }
 
+SAMPLE_Qs = [
+    {"question": "Why did the chicken cross the road?",
+     "important_stuff":
+         [{
+             'text': "sample sentence that should be highlighted.",
+             'offset': 3,
+             'length': 14,
+         },
+             {
+             'text': "another sentence that is important.",
+             'offset': 21,
+             'length': 16,
+         }]
+     },
+
+]
+
 parser = reqparse.RequestParser()
 
 
@@ -53,6 +70,7 @@ class NoteList(Resource):
     def post(self):
         parser.add_argument("title")
         parser.add_argument("content")
+        parser.add_argument("raw_json")
         # parser.add_argument("tags")
         # parser.add_argument("questions")
         args = parser.parse_args()
@@ -61,10 +79,13 @@ class NoteList(Resource):
         NOTES[note_id] = {
             'title': args['title'],
             'content': args['content'],
+            'raw_json': args['raw_json'],
             'tags': [],
-            'questions': {}
+            'questions': ['question1?', 'question2?']
         }
-        return NOTES[note_id], 201
+        print("printing raw JSON ---------")
+        print(args['raw_json'])
+        return [NOTES[note_id], 201]
 
 
 class Note(Resource):
