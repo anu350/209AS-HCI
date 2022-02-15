@@ -2,9 +2,17 @@
 # also try:
 # - https://levelup.gitconnected.com/full-stack-web-app-with-python-react-and-bootstrap-backend-8592baa6e4eb
 
+from operator import concat
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
+
+import json
+
+from pipelines import pipeline
+
+nlp = pipeline("question-generation",
+               model="valhalla/t5-small-qg-prepend", qg_format="prepend")
 
 app = Flask(__name__)
 CORS(app)
@@ -81,11 +89,16 @@ class NoteList(Resource):
             'content': args['content'],
             'raw_json': args['raw_json'],
             'tags': [],
-            'questions': ['question1?', 'question2?']
+            'questions': []
         }
-        print("printing raw JSON ---------")
-        print(args['raw_json'])
-        return [NOTES[note_id], 201]
+        thenote = json.loads(args['raw_json'])
+        concat_note = ""
+        for i in range(len(thenote["blocks"])):
+            concat_note += thenote["blocks"][i]["text"]
+
+        output = nlp(concat_note)
+        # print(output)
+        return [NOTES[note_id], output, 201]
 
 
 class Note(Resource):
