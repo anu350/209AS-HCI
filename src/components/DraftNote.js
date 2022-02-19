@@ -1,5 +1,7 @@
 // Note using Draft.js instead of quill
 // source: https://reactrocket.com/post/draft-js-persisting-content/
+//
+// PENDING: - FIX EDITOR WIDTH SO THAT IT DOESNT CHANGE DEPENDING ON CONTENT.
 
 import React, { Component } from "react";
 import "draft-js/dist/Draft.css";
@@ -49,7 +51,7 @@ class MyEditor extends Component {
       .update({
         raw_json: JSON.stringify(convertToRaw(content)),
         last_edit_time: edit_time,
-        note: convertToRaw(content).blocks[0].text.substring(0, 65),
+        note: convertToRaw(content).blocks[0].text.substring(0, 50),
       })
       .match({ id: this.props.note.id });
     console.log("saved note contents");
@@ -202,9 +204,11 @@ const styles2 = {
     height: "65vh",
     padding: 10,
     width: "90%",
+    // maxWidth: "90%",
     // display: "block",
     marginLeft: "auto",
     marginRight: "auto",
+    overflowY: "auto",
   },
   buttonBar: {
     // paddingLeft: 10,

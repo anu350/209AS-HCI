@@ -41,7 +41,6 @@ export default class QEditor extends Component {
       })
       .match({ id: this.props.note.id });
     console.log("saved note contents");
-    // this.props.updatecallback();
   }, 1000);
 
   onChange = (editorState) => {
@@ -71,7 +70,6 @@ export default class QEditor extends Component {
             <input
               style={styles3.notetitle}
               type="text"
-              //   onChange={this.onTitleChange}
               disabled="disabled"
               placeholder={this.title}
             />
@@ -100,24 +98,19 @@ const styles3 = {
     fontFamily: "'Helvetica', sans-serif",
     paddingRight: 20,
     paddingLeft: 20,
-    // borderStyle: "solid",
-    // borderWidth: "5px",
-    // borderColor: "red",
-    // flexGrow: 1,
   },
   actualEditor: {
-    // border: "3px solid #eee",
-    border: "4px solid #fafafa",
+    border: "4px solid darkgray",
     cursor: "text",
     height: "70vh",
     padding: 10,
-    // width: "90%",
     marginLeft: "auto",
     marginRight: "auto",
+    backgroundColor: "whitesmoke",
+    overflowY: "auto",
   },
   buttonBar: {
     height: "45px",
-    // width: "90%",
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
@@ -136,7 +129,8 @@ const styles3 = {
     fontSize: "30px",
     fontWeight: "bold",
     padding: "none",
-    // width: "100%",
     marginBottom: "15px",
+    background: "none",
+    color: "black",
   },
 };

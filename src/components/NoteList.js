@@ -148,8 +148,8 @@ const style = {
     borderStyle: "solid",
     borderWidth: "7px",
     borderColor: "rgba(255,0,0,0.3)",
-    maxWidth: "25vw",
-    minWidth: "300px",
+    // maxWidth: "25vw",
+    minWidth: "340px",
     width: "360px",
   },
   searchBar: {
@@ -163,11 +163,6 @@ const style = {
     width: "100%",
     height: "100%",
     cursor: "pointer",
-    // borderTop: "solid 1px blue",
-    // borderBottom: "solid 1px blue",
-    // borderStyle: "solid",
-    // borderWidth: "5px",
-    // borderColor: "red",
     overflowY: "auto",
   },
 };

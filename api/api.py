@@ -2,7 +2,6 @@
 # also try:
 # - https://levelup.gitconnected.com/full-stack-web-app-with-python-react-and-bootstrap-backend-8592baa6e4eb
 
-from operator import concat
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
