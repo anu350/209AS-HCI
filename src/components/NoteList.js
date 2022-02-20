@@ -20,10 +20,10 @@ export default function NoteList(props) {
     fetchNotes();
 
     if (props.persistFullNote) {
-      console.log(
-        "in notelist-> useeffect -> persistfullnote",
-        props.persistFullNote
-      );
+      // console.log(
+      //   "in notelist-> useeffect -> persistfullnote",
+      //   props.persistFullNote
+      // );
       setCurrentNote(props.persistFullNote);
     } else if (notes.length) {
       console.log("notelist/usefect notes", notes);

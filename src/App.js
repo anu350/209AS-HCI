@@ -15,6 +15,7 @@ import TopBar from "./components/TopBar";
 import Settings from "./components/Settings";
 import QuestionContainer from "./components/QuestionContainer";
 import QEditor from "./components/QEditor";
+import QuizContainer from "./components/QuizContainer";
 
 function App() {
   const [showSettings, setShowSettings] = useState(false);
@@ -67,7 +68,8 @@ function App() {
           togglequestionmode={togglequestionmode}
         />
       </div>
-      {questionMode ? (
+      {/* --------------------Uncomment this to create questions */}
+      {/* {questionMode ? (
         <div style={styles.qmode}>
           <div style={styles.qeditor}>
             <QEditor
@@ -81,6 +83,13 @@ function App() {
               noteId={currentNoteId}
               fullnote={currentFullNote}
             />
+          </div>
+        </div>
+      ) : ( */}
+      {questionMode ? (
+        <div style={styles.qmode}>
+          <div style={styles.qcontainer}>
+            <QuizContainer noteId={currentNoteId} fullnote={currentFullNote} />
           </div>
         </div>
       ) : (

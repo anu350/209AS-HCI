@@ -8,7 +8,7 @@ export default function QuestionContainer(props) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log("props.id:", props.noteId);
+    // console.log("props.id:", props.noteId);
     fetchQuestions(props.noteId);
   }, []);
 
@@ -42,38 +42,63 @@ export default function QuestionContainer(props) {
     if (error) console.log("error fetching questions", error);
     else {
       if (qs.length) {
-        console.log("fetched questions:", qs);
+        // console.log("fetched questions:", qs);
         // qs.map((aq) => console.log(aq.question));
         qs.map((aq) =>
           setQuestions((myquestions) => [...myquestions, aq.question])
         );
       }
     }
-    console.log("myquestions: ", myquestions);
+    // console.log("fetchQuestions() -- ", myquestions);
   };
 
+  const checkSavedQuestions = async () => {
+    let data;
+    try {
+      data = await supabase
+        .from("questions")
+        .select("question")
+        .eq("related_note", props.noteId)
+        .then((value) =>
+          value.data.map((item) => {
+            return item["question"];
+          })
+        );
+    } catch (err) {
+      console.log(err);
+    }
+    // console.log("checksavedq_ data:", data);
+    return data;
+  };
+
+  // check content hasn't been uploaded yet before saving
   const saveQuestions = async () => {
     const creation_time = new Date().toISOString();
-    const { data, error } = await supabase.from("questions").insert(
-      myquestions.map((q, idx) => ({
-        created_at: creation_time,
-        related_note: props.noteId,
-        question: q,
-        answer: "",
-        index: idx,
-      }))
-    );
 
-    // let data2post =
-    console.log(
-      myquestions.map((q, idx) => ({
-        created_at: creation_time,
-        related_note: props.noteId,
-        question: q,
-        answer: "",
-        index: idx,
-      }))
-    );
+    // 1. query questions by matching related_note
+    let prevSavedQs = await checkSavedQuestions();
+    console.log(prevSavedQs);
+    let idx_offset = prevSavedQs.length;
+    // 2. find how many of our currently generated notes are already in the returned array
+    let newQuestions = myquestions.filter((x) => !prevSavedQs.includes(x));
+    console.log("in saveQuestions/ newQuestions:", newQuestions);
+    // 3. if any new --> post + display saved # notes
+    if (newQuestions.length > 0) {
+      let { error } = await supabase.from("questions").insert(
+        newQuestions.map((q, idx) => ({
+          created_at: creation_time,
+          related_note: props.noteId,
+          question: q,
+          answer: "",
+          index: idx + idx_offset,
+        }))
+      );
+      if (error) console.log("error when saving new questions");
+      console.log("saved ", newQuestions.length, " new questions!");
+    } else {
+      // 4. else display notes already saved
+      console.log("no new questions to be saved");
+    }
   };
 
   const getTest = () => {
@@ -92,11 +117,8 @@ export default function QuestionContainer(props) {
     setLoading(true);
     fetch("http://localhost:5000/notes/", {
       method: "POST",
-      // headers: { CORS: "Access-Control-Allow-Origin" },
       headers: {
-        // CORS: "Access-Control-Allow-Origin",
         "content-type": "application/json",
-        // accepts: "application/json",
       },
       body: JSON.stringify({
         title: "test title",
@@ -109,20 +131,26 @@ export default function QuestionContainer(props) {
       .then((json) => {
         console.log("full resposnse:", json);
         if (json[2] === 201) {
-          console.log(Array.isArray(json[1]));
-          json[1].map(
-            (x) => setQuestions((myquestions) => [...myquestions, x.question]) // error ---------------
+          let transit_questions = json[1].map((q) => q.question);
+          // checkIf New Questions
+          let newQuestions = transit_questions.filter(
+            (x) => !myquestions.includes(x)
           );
+          if (newQuestions.length > 0) {
+            newQuestions.map((aquestion) =>
+              setQuestions((myquestions) => [...myquestions, aquestion])
+            );
+            // await saveQuestions();
+          } else {
+            console.log("no new questions");
+          }
         }
         setLoading(false);
+      })
+      .catch((error) => {
+        console.log("error occured while onGenerate:", error);
+        setLoading(false);
       });
-    // ------------------
-    // NOTE:
-    // can use this function as the generate button
-    // make an async call to python
-    // python returns an array
-    // array holds questions
-    // if non empty, post to supabase DB
   };
 
   return (
