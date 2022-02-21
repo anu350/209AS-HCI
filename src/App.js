@@ -10,12 +10,12 @@
 
 import "./App.css";
 import React, { useState } from "react";
-import NoteList from "./components/NoteList";
+import NoteList from "./components/noteEditor/NoteList";
 import TopBar from "./components/TopBar";
 import Settings from "./components/Settings";
-import QuestionContainer from "./components/QuestionContainer";
-import QEditor from "./components/QEditor";
-import QuizContainer from "./components/QuizContainer";
+import QuestionContainer from "./components/unused/QuestionContainer";
+import QEditor from "./components/unused/QEditor";
+// import QuizContainer from "./components/quiz/QuizContainer";
 
 function App() {
   const [showSettings, setShowSettings] = useState(false);
@@ -69,7 +69,7 @@ function App() {
         />
       </div>
       {/* --------------------Uncomment this to create questions */}
-      {/* {questionMode ? (
+      {questionMode ? (
         <div style={styles.qmode}>
           <div style={styles.qeditor}>
             <QEditor
@@ -85,14 +85,14 @@ function App() {
             />
           </div>
         </div>
-      ) : ( */}
-      {questionMode ? (
-        <div style={styles.qmode}>
-          <div style={styles.qcontainer}>
-            <QuizContainer noteId={currentNoteId} fullnote={currentFullNote} />
-          </div>
-        </div>
       ) : (
+        // {questionMode ? (
+        //   <div style={styles.qmode}>
+        //     <div style={styles.qcontainer}>
+        //       <QuizContainer noteId={currentNoteId} fullnote={currentFullNote} />
+        //     </div>
+        //   </div>
+        // ) : (
         <div style={styles.noteContainer}>
           <NoteList
             retrieveId={retrieveId}

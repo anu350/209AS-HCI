@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 import MyEditor from "./DraftNote";
 import NoteBrief from "./NoteBrief";
 

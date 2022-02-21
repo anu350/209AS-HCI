@@ -8,10 +8,17 @@ from flask_cors import CORS
 
 import json
 
-from pipelines import pipeline
+# old NLP version ------------------------------------------------------------------
 
-nlp = pipeline("question-generation",
-               model="valhalla/t5-small-qg-prepend", qg_format="prepend")
+# from pipelines import pipeline
+
+# nlp = pipeline("question-generation",
+#                model="valhalla/t5-small-qg-prepend", qg_format="prepend")
+# ----------------------------------------------------------------------------------
+
+from question_generator_mc import QuestionGenerator
+
+nlp = QuestionGenerator()
 
 app = Flask(__name__)
 CORS(app)
@@ -95,7 +102,8 @@ class NoteList(Resource):
         for i in range(len(thenote["blocks"])):
             concat_note += thenote["blocks"][i]["text"]
 
-        output = nlp(concat_note)
+        # output = nlp(concat_note)
+        output = nlp.generate(concat_note, answer_style="multiple_choice")
         # print(output)
         return [NOTES[note_id], output, 201]
 

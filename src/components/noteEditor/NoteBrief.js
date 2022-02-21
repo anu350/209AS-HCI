@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 
 const getDate = (raw_timestamp) => {
   // console.log(raw_timestamp);                        // raw format: 2022-02-01T10:03:04+00:00

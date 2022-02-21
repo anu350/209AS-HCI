@@ -2,8 +2,9 @@
 // -- display as list instead of a flow for ease.
 
 import React, { useState, useEffect } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 import Question from "./Question";
+// import Quiz from "react-quiz-component";
 // import Answers from "./Answer";
 // import Results from "./Results";
 
@@ -24,6 +25,7 @@ export default function QuizContainer() {
 
   const startQuiz = () => {
     // do question size checks in here
+    loadQuestions();
     // if everything looks good, change state:
     setStarted(true);
     console.log("quiz has started");
@@ -31,6 +33,11 @@ export default function QuizContainer() {
 
   const endQuiz = () => {
     setStarted(false);
+  };
+
+  const loadQuestions = async () => {
+    // try: fetch from DB
+    // if empty : generate from python
   };
 
   function runQuiz() {
