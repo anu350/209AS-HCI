@@ -1,17 +1,84 @@
-import React, { useState } from "react";
-import '../../node_modules/font-awesome/css/font-awesome.min.css'; 
+import React, { useState, useEffect } from "react";
+import { supabase } from "../lib/supabaseClient";
+import Question from "./Question";
 
 export default function QuestionContainer(props) {
   const [myquestions, setQuestions] = useState([]);
+  const [empty, setEmpty] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    console.log("props.id:", props.noteId);
+    fetchQuestions(props.noteId);
+  }, []);
+
+  useEffect(() => {
+    if (myquestions.length) {
+      setEmpty(false);
+    } else {
+      setEmpty(true);
+    }
+  }, [myquestions]);
+
+  const onClear = async () => {
+    if (empty) {
+      return;
+    }
+    setQuestions([]);
+    let { data, error } = await supabase
+      .from("questions")
+      .delete()
+      .match({ related_note: props.noteId });
+    if (error) console.log("error deleting questions", error);
+    setEmpty(true);
+    return;
+  };
+
+  const fetchQuestions = async (my_id) => {
+    const { data: qs, error } = await supabase
+      .from("questions")
+      .select("question")
+      .eq("related_note", my_id);
+    if (error) console.log("error fetching questions", error);
+    else {
+      if (qs.length) {
+        console.log("fetched questions:", qs);
+        // qs.map((aq) => console.log(aq.question));
+        qs.map((aq) =>
+          setQuestions((myquestions) => [...myquestions, aq.question])
+        );
+      }
+    }
+    console.log("myquestions: ", myquestions);
+  };
+
+  const saveQuestions = async () => {
+    const creation_time = new Date().toISOString();
+    const { data, error } = await supabase.from("questions").insert(
+      myquestions.map((q, idx) => ({
+        created_at: creation_time,
+        related_note: props.noteId,
+        question: q,
+        answer: "",
+        index: idx,
+      }))
+    );
+
+    // let data2post =
+    console.log(
+      myquestions.map((q, idx) => ({
+        created_at: creation_time,
+        related_note: props.noteId,
+        question: q,
+        answer: "",
+        index: idx,
+      }))
+    );
+  };
 
   const getTest = () => {
-    fetch("http://localhost:5000/notes/", {
+    fetch("http://localhost:5000/notes", {
       method: "GET",
-      headers : { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-       },
-
     })
       .then((response) => {
         return response.json();
@@ -21,7 +88,8 @@ export default function QuestionContainer(props) {
       });
   };
 
-  const postTest = () => {
+  const onGenerate = () => {
+    setLoading(true);
     fetch("http://localhost:5000/notes/", {
       method: "POST",
       // headers: { CORS: "Access-Control-Allow-Origin" },
@@ -39,16 +107,14 @@ export default function QuestionContainer(props) {
         return response.json();
       })
       .then((json) => {
-        // setQuestions(json[0].questions);
-        // console.log("errorcode: ", json[1]);
         console.log("full resposnse:", json);
         if (json[2] === 201) {
           console.log(Array.isArray(json[1]));
-          // json[1].map((x) => console.log(x.question));
-          json[1].map((x) =>
-            setQuestions((myquestions) => [myquestions, x.question])
+          json[1].map(
+            (x) => setQuestions((myquestions) => [...myquestions, x.question]) // error ---------------
           );
         }
+        setLoading(false);
       });
     // ------------------
     // NOTE:
@@ -59,62 +125,40 @@ export default function QuestionContainer(props) {
     // if non empty, post to supabase DB
   };
 
-  const buttonHover = (event) => {
-    event.target.style.backgroundColor = "#abc6fd";
-    event.target.style.transitionDuration = "0.2s";
-    // event.target.style.backgroundColor = "#ebebeb";
-  };
-
-  const stopButtonHover = (event) => {
-    event.target.style.backgroundColor = "";
-    // event.target.style.backgroundColor = "";
-  };
-
   return (
     <div>
-      <h2>Question Container</h2>
-      <button style={styles.questionButton} onClick={getTest} onMouseEnter={buttonHover} onMouseLeave={stopButtonHover}>
-        Request Question
-      </button>
-      <button style={styles.questionButton} onClick={postTest} onMouseEnter={buttonHover} onMouseLeave={stopButtonHover}>     
-        Generate Question
-      </button><br></br>
-      {myquestions.length ? (
-        myquestions.map((question, index) => (
-          <div style={styles.questions} key={index} className="question">
-            <h3>{index+1}) {question}</h3>
-          </div>
-        ))
-      ) : (
-        <span>Empty - might be just loading or error in python!</span> //include loading icon until q generated
-      )}
-
+      <h2>Questions</h2>
+      <button onClick={onGenerate}>Generate</button>
+      <button onClick={onClear}>Clear</button>
+      <button onClick={saveQuestions}>Save</button>
+      <div>
+        {
+          {
+            false: (
+              <div>
+                {myquestions.map((myQ, index) => (
+                  <div
+                    style={styles.questions}
+                    key={index}
+                    // noteId={props.noteId}
+                  >
+                    <Question question={myQ} />
+                  </div>
+                ))}
+              </div>
+            ),
+            true: <div>{loading ? <p>Loading</p> : <p>No questions</p>} </div>,
+          }[empty]
+        }
+      </div>
     </div>
   );
 }
 
 const styles = {
   questions: {
-    height: "40px",
-    // width: "40px",
-    fontSize: "15px",
-    padding: "0px",
+    fontSize: "20px",
+    paddingTop: "10px",
     marginRight: "2.5px",
   },
-
-  questionButton: {
-    fontFamily: "Arial,Helvetica,sans-serif",
-    fontSize: "15px",
-    height: "35px",
-    width: "30%",
-    padding: "0px",
-    marginLeft: "20px",
-    marginRight: "20px",
-    borderRadius: "8px",
-    backgroundColor: "white", 
-    color: "black", 
-    border: "1px solid #abc6fd",
-    cursor: "pointer", 
-  },
-
 };

@@ -11,14 +11,11 @@ import { supabase } from "../lib/supabaseClient";
 import MyEditor from "./DraftNote";
 import NoteBrief from "./NoteBrief";
 import "../../node_modules/font-awesome/css/font-awesome.min.css"; 
-import { useSpring, animated, useTransition } from 'react-spring';
-import { Spring } from 'react-spring';
+
 
 export default function NoteList(props) {
-  const prop2 = useSpring({ transitionDuration: 10000, from: { opacity: 0 }, to: { opacity: 1 }});
   const [notes, setNotes] = useState([]);
   const [currentNote, setCurrentNote] = useState({});
-
 
   // This is called the first time component loads!
   useEffect(() => {
@@ -63,7 +60,7 @@ export default function NoteList(props) {
     event.target.style.backgroundColor = "";
     // event.target.style.backgroundColor = "";
   };
-
+  
   const briefClick = (clickedId) => {
     let thenote = notes.find((n) => n.id === clickedId);
     setCurrentNote(thenote);
@@ -114,7 +111,6 @@ export default function NoteList(props) {
           <button className ="fa fa-pencil" style={style.newNote} onClick={addNote} onMouseEnter={buttonHover} onMouseLeave={stopButtonHover}>
           </button>
         </div>
-         
         <div className="notebriefscontainer" style={style.noteList}>
           {notes.length ? (
             notes.map((note) => (
@@ -158,7 +154,6 @@ const style = {
     border: "1px solid #abc6fd",
     cursor: "pointer", 
   },
-
   generalApp: {
     display: "flex",
     flexDirection: "row",
@@ -170,8 +165,8 @@ const style = {
     borderStyle: "solid",
     borderWidth: "7px",
     borderColor: "rgba(255,0,0,0.3)",
-    maxWidth: "25vw",
-    minWidth: "300px",
+    // maxWidth: "25vw",
+    minWidth: "340px",
     width: "360px",
   },
   searchBar: {
@@ -185,11 +180,6 @@ const style = {
     width: "100%",
     height: "100%",
     cursor: "pointer",
-    // borderTop: "solid 1px blue",
-    // borderBottom: "solid 1px blue",
-    // borderStyle: "solid",
-    // borderWidth: "5px",
-    // borderColor: "red",
     overflowY: "auto",
   },
 };

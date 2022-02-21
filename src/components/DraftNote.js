@@ -1,5 +1,7 @@
 // Note using Draft.js instead of quill
 // source: https://reactrocket.com/post/draft-js-persisting-content/
+//
+// PENDING: - FIX EDITOR WIDTH SO THAT IT DOESNT CHANGE DEPENDING ON CONTENT.
 
 import React, { Component } from "react";
 import "draft-js/dist/Draft.css";
@@ -17,7 +19,6 @@ import {
   convertFromRaw,
   // Modifier,
 } from "draft-js";
-//import NoteBrief from "./NoteBrief";
 
 class MyEditor extends Component {
   constructor(props) {
@@ -32,7 +33,6 @@ class MyEditor extends Component {
     this.handleKeyCommand = this.handleKeyCommand.bind(this); // needed for handling bold, etc
   }
 
-  
   saveTitle = debounce(async (title) => {
     // console.log("savingTitle: ", title);
     const edit_time = new Date().toISOString();
@@ -53,7 +53,7 @@ class MyEditor extends Component {
       .update({
         raw_json: JSON.stringify(convertToRaw(content)),
         last_edit_time: edit_time,
-        note: convertToRaw(content).blocks[0].text.substring(0, 65),
+        note: convertToRaw(content).blocks[0].text.substring(0, 50),
       })
       .match({ id: this.props.note.id });
     console.log("saved note contents");
@@ -63,6 +63,17 @@ class MyEditor extends Component {
   onTitleChange = (title) => {
     console.log("inside ontitle change, value:", title.target.value);
     this.saveTitle(title.target.value);
+  };
+
+  buttonHover = (event) => {
+    event.target.style.backgroundColor = "#abc6fd";
+    event.target.style.transitionDuration = "0.2s";
+    // event.target.style.backgroundColor = "#ebebeb";
+  };
+  
+  stopButtonHover = (event) => {
+    event.target.style.backgroundColor = "";
+    // event.target.style.backgroundColor = "";
   };
 
   createContent(note) {
@@ -140,18 +151,6 @@ class MyEditor extends Component {
     this.onChange(RichUtils.toggleCode(this.state.editorState));
   };
 
-  buttonHover = (event) => {
-    event.target.style.backgroundColor = "#abc6fd";
-    event.target.style.transitionDuration = "0.2s";
-    // event.target.style.backgroundColor = "#ebebeb";
-  };
-  
-  stopButtonHover = (event) => {
-    event.target.style.backgroundColor = "";
-    // event.target.style.backgroundColor = "";
-  };
-  
-
   render() {
     return (
       <div style={styles2.noteEditor}>
@@ -192,7 +191,6 @@ class MyEditor extends Component {
               onMouseEnter={this.buttonHover.bind(this)} 
               onMouseLeave={this.stopButtonHover.bind(this)}
             >
-             
             </button>
             {/* <button onClick={this._onToggleCode.bind(this)}>Code block</button> */}
           </div>
@@ -227,19 +225,21 @@ const styles2 = {
     height: "65vh",
     padding: 10,
     width: "90%",
+    // maxWidth: "90%",
     // display: "block",
     marginLeft: "auto",
     marginRight: "auto",
+    overflowY: "auto",
   },
-
   buttonBar: {
     // paddingLeft: 10,
+    height: "45px",
+    width: "90%",
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
     marginLeft: "auto",
     marginRight: "auto",
-    marginBottom: "5px",
   },
   editorContainer: {
     display: "flex",
@@ -250,7 +250,7 @@ const styles2 = {
     marginLeft: "10px", 
     width: "10%",
     textAlign: "center",
-    height: "45px",
+    height: "35px",
     padding: "0px",
     position: "relative",
     borderRadius: "8px", 
@@ -258,7 +258,6 @@ const styles2 = {
     border: "1px solid #abc6fd",
     cursor: "pointer", 
   },
-
   notetitle: {
     border: "none",
     display: "inline",
