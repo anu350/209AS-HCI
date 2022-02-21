@@ -16,6 +16,7 @@
  import QEditor from "./components/QEditor";
  import Quiz from "./components/Quiz";
  import MyEditor from "./components/DraftNote";
+import QuizContainer from "./components/QuizContainer";
  
  function App() {
    const [showSettings, setShowSettings] = useState(false);
@@ -66,10 +67,12 @@
        </div>
        {questionMode ? (
          <div style={styles.qmode}>
+         {/*  <QuizContainer />  */}
+
           <Quiz noteId={currentNoteId}
-               fullnote={currentFullNote} //pass in a title var too so button can have the title
-           />
-         </div>
+                fullnote={currentFullNote} //pass in a title var too so button can have the title
+       />
+         </div>  
        ) : (
          <div style={styles.noteContainer}>
            <NoteList
