@@ -1,22 +1,46 @@
-// Use this file as quiz interface
-// -- display as list instead of a flow for ease.
+// should do a "quiz start" screen that displays info about questions
 
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import Question from "./Question";
 import "../../../node_modules/font-awesome/css/font-awesome.min.css";
 import "./QuizContainer.css";
-// import Answers from "./Answer";
-// import Results from "./Results";
 
-const dummyQuestions = [
+// -------------------------------------------------------------------------------------------- Actual format to handle
+const realQuestions = [
   {
     question: "what?",
-    answer: "something",
+    answers: [
+      {
+        answer: "something",
+        correct: true,
+      },
+      {
+        answer: "something else",
+        correct: false,
+      },
+      {
+        answer: "something besides that",
+        correct: false,
+      },
+    ],
   },
   {
-    question: "what?",
-    answer: "something",
+    question: "Who?",
+    answers: [
+      {
+        answer: "someone",
+        correct: true,
+      },
+      {
+        answer: "someone else",
+        correct: false,
+      },
+      {
+        answer: "nobody",
+        correct: false,
+      },
+    ],
   },
 ];
 
@@ -49,27 +73,89 @@ const dummyMCquestions = [
   },
 ];
 
-export default function QuizContainer() {
+export default function QuizContainer(props) {
   const [myquestions, setQuestions] = useState([]);
   const [started, setStarted] = useState(false);
+  // const [empty, setEmpty] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [quizLength, setQuizLength] = useState(0);
 
-  let shuffledQuestions = []; //empty array to hold shuffled selected questions
+  let shuffledQuestions = []; //empty array to hold shuffled selected questions <----------------------------refactor using state and setstate
+  // >>>>> could just make a list of indexes and shuffle those.
+  //       instead of shuffling objects
   let questionNumber = 1;
-  let quizLength = dummyMCquestions.length;
   let playerScore = 0;
   let wrongAttempt = 0;
   let indexNumber = 0;
 
   useEffect(() => {
+    generateQuestions(props.noteId);
     console.log("Quiz start!");
-
-    NextQuestion(0);
   }, []);
 
+  useEffect(() => {
+    if (started) {
+      shuffleQuestions();
+      NextQuestion(0);
+    }
+  }, [started]);
+
+  useEffect(() => {
+    console.log("quizLength: ", quizLength);
+  });
+
+  const generateQuestions = async () => {
+    console.log("in questiongeneration");
+    setLoading(true);
+    fetch("http://localhost:5000/notes/", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        title: "test title",
+        raw_json: props.fullnote.raw_json,
+      }),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((json) => {
+        console.log("full resposnse:", json);
+        if (json[2] === 201) {
+          let transit_questions = json[1].map((q) => ({
+            question: q.question,
+            answers: q.answer,
+          }));
+          console.log("transit questions: ", transit_questions);
+          setQuestions(transit_questions);
+          setQuizLength(transit_questions.length);
+
+          // // checkIf New Questions
+          // let newQuestions = transit_questions.filter(
+          //   (x) => !myquestions.includes(x)
+          // );
+          // if (newQuestions.length > 0) {
+          //   newQuestions.map((aquestion) =>
+          //     setQuestions((myquestions) => [...myquestions, aquestion])
+          //   );
+          //   // await saveQuestions();
+          // } else {
+          //   console.log("no new questions");
+          // }
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log("error occured while onGenerate:", error);
+        setLoading(false);
+      });
+  };
+
   //SHUFFLE THE QUESTIONS
-  const handleQuestions = () => {
+  const shuffleQuestions = () => {
     while (shuffledQuestions.length < quizLength) {
-      const random = dummyMCquestions[Math.floor(Math.random() * quizLength)];
+      const random = myquestions[Math.floor(Math.random() * quizLength)];
       if (!shuffledQuestions.includes(random)) {
         shuffledQuestions.push(random);
       }
@@ -78,33 +164,39 @@ export default function QuizContainer() {
 
   // FUNCTION TO DISPLAY QUESTION FROM ARRAY IN DOM
   const NextQuestion = (index) => {
-    handleQuestions();
-    console.log("SHUFFLED: " + shuffledQuestions[0]);
+    // shuffleQuestions();
+    // console.log("SHUFFLED: " + shuffledQuestions[0]);
     const currentQuestion = shuffledQuestions[index];
     document.getElementById("question-number").innerHTML = questionNumber;
     document.getElementById("player-score").innerHTML = playerScore;
     document.getElementById("display-question").innerHTML =
       currentQuestion.question;
     document.getElementById("option-one-label").innerHTML =
-      currentQuestion.optionA;
+      currentQuestion.answers[0].answer;
     document.getElementById("option-two-label").innerHTML =
-      currentQuestion.optionB;
+      currentQuestion.answers[1].answer;
     document.getElementById("option-three-label").innerHTML =
-      currentQuestion.optionC;
+      currentQuestion.answers[2].answer;
     document.getElementById("option-four-label").innerHTML =
-      currentQuestion.optionD;
+      currentQuestion.answers[3].answer;
   };
 
   const checkForAnswer = () => {
     const currentQuestion = shuffledQuestions[indexNumber]; //gets current Question
-    const currentQuestionAnswer = currentQuestion.correctOption; //gets current Question's answer
-    const options = document.getElementsByName("option"); //gets all elements in dom with name of 'option' (in this the radio inputs)
+    // const currentQuestionAnswer = currentQuestion.correctOption; //gets current Question's index
+    const idx = shuffledQuestions[indexNumber].answers.findIndex(
+      (x) => x.correct === true
+    );
+    const answer_value = "option" + idx;
+    // console.log("my answer: ", x_answer);
+    const options = document.getElementsByName("option"); //gets all elements in dom with name of 'option' (in this the radio inputs) <-------- TOO HARDCODED!
     let correctOption = null;
 
     options.forEach((option) => {
-      if (option.value === currentQuestionAnswer) {
+      if (option.value === answer_value) {
         //get's correct's radio input with correct answer
-        correctOption = option.labels[0].id;
+        correctOption = option.labels[0].id; // < --------------------------------------------Sometimes fails
+        console.log("inside options loop: correctoption: ", correctOption);
       }
     });
 
@@ -120,7 +212,7 @@ export default function QuizContainer() {
 
     //checking if checked radio button is same as answer
     options.forEach((option) => {
-      if (option.checked === true && option.value === currentQuestionAnswer) {
+      if (option.checked === true && option.value === answer_value) {
         document.getElementById(correctOption).style.backgroundColor = "green";
         playerScore++;
         indexNumber++;
@@ -128,7 +220,7 @@ export default function QuizContainer() {
         setTimeout(() => {
           questionNumber++;
         }, 1000);
-      } else if (option.checked && option.value !== currentQuestionAnswer) {
+      } else if (option.checked && option.value !== answer_value) {
         const wrongLabelId = option.labels[0].id;
         document.getElementById(wrongLabelId).style.backgroundColor = "red";
         document.getElementById(correctOption).style.backgroundColor = "green";
@@ -178,7 +270,7 @@ export default function QuizContainer() {
     let remark = null;
     let remarkColor = null;
 
-    // condition check for player remark and remark color
+    // condition check for player remark and remark color <---------------------------------------------- Hardcoded. make dynamic or remove
     if (playerScore <= 3) {
       remark = "Bad Grades, Keep Practicing.";
       remarkColor = "red";
@@ -202,6 +294,7 @@ export default function QuizContainer() {
 
   //closes score modal and resets game
   const closeScoreModal = () => {
+    setStarted(false);
     questionNumber = 1;
     playerScore = 0;
     wrongAttempt = 0;
@@ -216,171 +309,150 @@ export default function QuizContainer() {
     document.getElementById("option-modal").style.display = "none";
   };
 
-  // const startQuiz = () => {
-  //   // do question size checks in here
-  //   loadQuestions();
-  //   // if everything looks good, change state:
-  //   setStarted(true);
-  //   console.log("quiz has started");
-  // };
-
-  // const endQuiz = () => {
-  //   setStarted(false);
-  // };
-
   const loadQuestions = async () => {
     // try: fetch from DB
     // if empty : generate from python
   };
 
-  // function runQuiz() {
-  //   const problems = [
-  //     {
-  //       question: "what?",
-  //       answer: "something",
-  //     },
-  //     {
-  //       question: "what?",
-  //       answer: "something",
-  //     },
-  //   ];
-  //   return problems.map((aProblem, idx) => {
-  //     return (
-  //       <div>
-  //         <div>{idx + ". " + aProblem.question}</div>
-  //         <div>{aProblem.answer}</div>
-  //       </div>
-  //     );
-  //   });
-  // }
-
-  // const retryQuiz = () => {
-  //   console.log("retry quiz");
-  // };
-
   return (
     <div>
-      <div>
-        <main>
-          <div className="modal-container" id="score-modal">
-            <div className="modal-content-container">
-              <h1>Congratulations, Quiz Completed.</h1>
+      {loading ? (
+        <p>loading</p>
+      ) : (
+        <button
+          onClick={() => {
+            setStarted(!started);
+          }}
+        >
+          start
+        </button>
+      )}
 
-              <div className="grade-details">
-                <p>Attempts : 10</p>
-                <p>
-                  Wrong Answers : <span id="wrong-answers"></span>
-                </p>
-                <p>
-                  Right Answers : <span id="right-answers"></span>
-                </p>
-                <p>
-                  Grade : <span id="grade-percentage"></span>%
-                </p>
-                <p>
-                  <span id="remarks"></span>
-                </p>
-              </div>
+      {started ? (
+        <div>
+          <main>
+            <div className="modal-container" id="score-modal">
+              <div className="modal-content-container">
+                <h1>Congratulations, Quiz Completed.</h1>
 
-              <div className="modal-button-container">
-                <button onClick={closeScoreModal}>Continue</button>
-              </div>
-            </div>
-          </div>
+                <div className="grade-details">
+                  <p>Attempts : 10</p>
+                  <p>
+                    Wrong Answers : <span id="wrong-answers"></span>
+                  </p>
+                  <p>
+                    Right Answers : <span id="right-answers"></span>
+                  </p>
+                  <p>
+                    Grade : <span id="grade-percentage"></span>%
+                  </p>
+                  <p>
+                    <span id="remarks"></span>
+                  </p>
+                </div>
 
-          <div className="game-quiz-container">
-            <div className="game-details-container">
-              <h1>
-                Score : <span id="player-score"></span> / 10
-              </h1>
-              <h1>
-                {" "}
-                Question : <span id="question-number"></span> / 10
-              </h1>
-            </div>
-
-            <div className="game-question-container">
-              <h1 id="display-question"></h1>
-            </div>
-
-            <div className="game-options-container">
-              <div className="modal-container" id="option-modal">
-                <div className="modal-content-container">
-                  <h1>Please Pick An Option</h1>
-
-                  <div className="modal-button-container">
-                    <button onClick={closeOptionModal}>Continue</button>
-                  </div>
+                <div className="modal-button-container">
+                  <button onClick={closeScoreModal}>Continue</button>
                 </div>
               </div>
-
-              <span>
-                <input
-                  type="radio"
-                  id="option-one"
-                  name="option"
-                  className="radio"
-                  value="optionA"
-                />
-                <label
-                  htmlFor="option-one"
-                  className="option"
-                  id="option-one-label"
-                ></label>
-              </span>
-
-              <span>
-                <input
-                  type="radio"
-                  id="option-two"
-                  name="option"
-                  className="radio"
-                  value="optionB"
-                />
-                <label
-                  htmlFor="option-two"
-                  className="option"
-                  id="option-two-label"
-                ></label>
-              </span>
-
-              <span>
-                <input
-                  type="radio"
-                  id="option-three"
-                  name="option"
-                  className="radio"
-                  value="optionC"
-                />
-                <label
-                  htmlFor="option-three"
-                  className="option"
-                  id="option-three-label"
-                ></label>
-              </span>
-
-              <span>
-                <input
-                  type="radio"
-                  id="option-four"
-                  name="option"
-                  className="radio"
-                  value="optionD"
-                />
-                <label
-                  htmlFor="option-four"
-                  className="option"
-                  id="option-four-label"
-                ></label>
-              </span>
             </div>
 
-            <div className="next-button-container">
-              <button onClick={handleNextQuestion}>Next Question</button>
+            <div className="game-quiz-container">
+              <div className="game-details-container">
+                <h1>
+                  Score : <span id="player-score"></span> / 10
+                </h1>
+                <h1>
+                  {" "}
+                  Question : <span id="question-number"></span> / 10
+                </h1>
+              </div>
+
+              <div className="game-question-container">
+                <h1 id="display-question"></h1>
+              </div>
+
+              <div className="game-options-container">
+                <div className="modal-container" id="option-modal">
+                  <div className="modal-content-container">
+                    <h1>Please Pick An Option</h1>
+
+                    <div className="modal-button-container">
+                      <button onClick={closeOptionModal}>Continue</button>
+                    </div>
+                  </div>
+                </div>
+
+                <span>
+                  <input
+                    type="radio"
+                    id="option-one"
+                    name="option"
+                    className="radio"
+                    value="option1"
+                  />
+                  <label
+                    htmlFor="option-one"
+                    className="option"
+                    id="option-one-label"
+                  ></label>
+                </span>
+
+                <span>
+                  <input
+                    type="radio"
+                    id="option-two"
+                    name="option"
+                    className="radio"
+                    value="option2"
+                  />
+                  <label
+                    htmlFor="option-two"
+                    className="option"
+                    id="option-two-label"
+                  ></label>
+                </span>
+
+                <span>
+                  <input
+                    type="radio"
+                    id="option-three"
+                    name="option"
+                    className="radio"
+                    value="option3"
+                  />
+                  <label
+                    htmlFor="option-three"
+                    className="option"
+                    id="option-three-label"
+                  ></label>
+                </span>
+
+                <span>
+                  <input
+                    type="radio"
+                    id="option-four"
+                    name="option"
+                    className="radio"
+                    value="option4"
+                  />
+                  <label
+                    htmlFor="option-four"
+                    className="option"
+                    id="option-four-label"
+                  ></label>
+                </span>
+              </div>
+
+              <div className="next-button-container">
+                <button onClick={handleNextQuestion}>Next Question</button>
+              </div>
             </div>
-          </div>
-        </main>
-      </div>
+          </main>
+        </div>
+      ) : (
+        <p>notstarted</p>
+      )}
     </div>
   );
 }
