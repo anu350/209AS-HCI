@@ -26,18 +26,48 @@ main {
   background-position: center;
 } */
 
+.start-quiz-container{
+  display: flex;
+  justify-content: center;
+}
+
+.start-quiz{
+    height: 30px;
+    width: 10%;
+    font-size: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    border-radius: 20px;
+    cursor: pointer;
+    border:1px solid #abc6fd;
+    background-color: "";   
+}
+
+.start-quiz:hover{
+  background-color: #abc6fd;
+}
+
+.overall-container{
+  display: flex;
+  justify-content: center;
+}
+
 .game-quiz-container {
   width: 40rem;
   height: 30rem;
-  background-color: rgb(192, 185, 255);
+  background-color: rgb(168, 194, 223);
   border: 1px solid black;
   display: flex;
+  justify-content: center;
+  border-radius: 30px;
+  /*position: relative;*/
+  position: fixed;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
-  border-radius: 30px;
-  position: relative;
-  bottom: 80px;
+  -webkit-animation: fadeIn 0.4s ease-in-out;
+  animation: fadeIn 0.4s ease-in-out;
+  
 }
 
 .game-details-container {
@@ -109,7 +139,7 @@ input[type="radio"] {
 }
 
 input[type="radio"]:checked ~ .option {
-  background: paleturquoise;
+  background: darkgray;
 }
 
 .next-button-container {
@@ -130,7 +160,7 @@ input[type="radio"]:checked ~ .option {
   outline: none;
 }
 .next-button-container button:hover {
-  background-color: rgb(143, 93, 93);
+  background-color: rgb(27, 161, 121);
 }
 
 .modal-container {
@@ -185,14 +215,14 @@ input[type="radio"]:checked ~ .option {
 
 .modal-button-container {
   height: 2rem;
-  width: 100%;
+  width: 90%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: right;
 }
 
 .modal-button-container button {
-  width: 10rem;
+  width: 5rem;
   height: 2rem;
   background: none;
   outline: none;
@@ -303,3 +333,5 @@ input[type="radio"]:checked ~ .option {
     opacity: 1;
   }
 }
+
+/* Div Surrounding Container Styling */
