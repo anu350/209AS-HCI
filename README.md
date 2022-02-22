@@ -4,5 +4,5 @@
 - Centering Quiz Container on Page & Some Styling Updates
 
 
-# missing:
-- more animations/transitions
+# Missing:
+- More Animations/Transitions
