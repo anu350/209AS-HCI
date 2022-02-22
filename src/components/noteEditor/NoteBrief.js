@@ -23,9 +23,27 @@ export default function NoteBrief(props) {
     }
   };
 
+  const buttonHover = (event) => {
+    event.target.style.backgroundColor = "#abc6fd";
+    event.target.style.transitionDuration = "0.2s";
+    // event.target.style.backgroundColor = "#ebebeb";
+  };
+
+  const stopButtonHover = (event) => {
+    event.target.style.backgroundColor = "";
+    // event.target.style.backgroundColor = "";
+  };
+
   return (
     <div style={styles.notebriefContainer}>
-      <button onClick={deleteNote}>delete</button>
+      <button 
+        style={styles.deleteButton} 
+        onClick={deleteNote} 
+        onMouseEnter={buttonHover} 
+        onMouseLeave={stopButtonHover}
+      >
+          delete
+      </button>
       <div style={styles.flexBriefHeader}>
         <div>
           {props.note.title ? (
@@ -60,5 +78,19 @@ const styles = {
     alignItems: "center",
     height: "45px",
     // width: "100px",
+  },
+  deleteButton: {
+    height: "20px",
+    width: "50px",
+    fontSize: "15px",
+    padding: "0px",
+    position: "relative",
+    marginTop:"0px",
+    //marginRight: "2.5px",
+    borderRadius: "8px",
+    backgroundColor: "", 
+    color: "black", 
+    border: "1px solid #abc6fd",
+    cursor: "pointer", 
   },
 };

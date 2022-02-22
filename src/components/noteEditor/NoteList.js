@@ -48,6 +48,17 @@ export default function NoteList(props) {
     // event.target.style.backgroundColor = "";
   };
 
+  const buttonHover = (event) => {
+    event.target.style.backgroundColor = "#abc6fd";
+    event.target.style.transitionDuration = "0.2s";
+    // event.target.style.backgroundColor = "#ebebeb";
+  };
+
+  const stopButtonHover = (event) => {
+    event.target.style.backgroundColor = "";
+    // event.target.style.backgroundColor = "";
+  };
+
   const briefClick = (clickedId) => {
     let thenote = notes.find((n) => n.id === clickedId);
     setCurrentNote(thenote);
@@ -95,7 +106,12 @@ export default function NoteList(props) {
     <div style={style.generalApp}>
       <div className="leftbar-container" style={style.leftBar}>
         <div className="searchbar-container" style={style.searchBar}>
-          <button style={style.newNote} onClick={addNote}>
+          <button 
+            style={style.newNote} 
+            onClick={addNote} 
+            onMouseEnter={buttonHover}
+            onMouseLeave={stopButtonHover}
+          >
             +
           </button>
         </div>
@@ -164,5 +180,17 @@ const style = {
     height: "100%",
     cursor: "pointer",
     overflowY: "auto",
+  },
+  newNote: {
+    height: "40px",
+    width: "40px",
+    fontSize: "26px",
+    padding: "0px",
+    marginRight: "2.5px",
+    borderRadius: "8px",
+    backgroundColor: "", 
+    color: "black", 
+    border: "1px solid #abc6fd",
+    cursor: "pointer", 
   },
 };

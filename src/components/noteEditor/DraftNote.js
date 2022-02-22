@@ -138,6 +138,17 @@ class MyEditor extends Component {
     this.onChange(RichUtils.toggleCode(this.state.editorState));
   };
 
+  buttonHover = (event) => {
+    event.target.style.backgroundColor = "#abc6fd";
+    event.target.style.transitionDuration = "0.2s";
+    // event.target.style.backgroundColor = "#ebebeb";
+  };
+
+  stopButtonHover = (event) => {
+    event.target.style.backgroundColor = "";
+    // event.target.style.backgroundColor = "";
+  };
+
   render() {
     return (
       <div style={styles2.noteEditor}>
@@ -156,18 +167,24 @@ class MyEditor extends Component {
             <button
               style={styles2.button}
               onClick={this._onBoldClick.bind(this)}
+              onMouseEnter={this.buttonHover}
+              onMouseLeave={this.stopButtonHover}
             >
               Bold
             </button>
             <button
               style={styles2.button}
               onClick={this._onItalicClick.bind(this)}
+              onMouseEnter={this.buttonHover}
+              onMouseLeave={this.stopButtonHover}
             >
               Italic
             </button>
             <button
               style={styles2.button}
               onClick={this._onUnderlineClick.bind(this)}
+              onMouseEnter={this.buttonHover}
+              onMouseLeave={this.stopButtonHover}
             >
               Underline
             </button>
@@ -225,9 +242,17 @@ const styles2 = {
     flexDirection: "column",
   },
   button: {
-    marginTop: 10,
-    width: "20%",
-    textAlign: "center",
+    height: "30px",
+    width: "100px",
+    marginRight: "10px",
+    fontSize: "15px",
+    padding: "0px",
+    position: "relative",
+    borderRadius: "8px",
+    backgroundColor: "", 
+    color: "black", 
+    border: "1px solid #abc6fd",
+    cursor: "pointer", 
   },
   notetitle: {
     border: "none",
