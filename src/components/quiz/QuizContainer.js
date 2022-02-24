@@ -5,6 +5,8 @@ import { supabase } from "../../lib/supabaseClient";
 import Question from "./Question";
 import "../../../node_modules/font-awesome/css/font-awesome.min.css";
 import "./QuizContainer.css";
+//import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+//import Oval from 'react-loader-spinner';
 
 // -------------------------------------------------------------------------------------------- Actual format to handle
 const realQuestions = [
@@ -317,8 +319,9 @@ export default function QuizContainer(props) {
   return (
     <div>
       {loading ? (
-        <p className="overall-container">Loading Quiz...</p>
-      ) : (
+
+        <p className="overall-container"> <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i></p>
+      ) : ( 
         <div className="start-quiz-container">
           {/* If quiz started, display close button, else display start button*/}
           {started ? ( 
@@ -466,7 +469,7 @@ export default function QuizContainer(props) {
           </main>
         </div>
       ) : (
-        <p className="overall-container">Quiz Not Started Yet</p>
+        <p className="overall-container"></p>
       )}
     </div>
   );
