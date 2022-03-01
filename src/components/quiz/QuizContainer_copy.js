@@ -1,30 +1,34 @@
-// should do a "quiz start" screen that displays info about questions
+// use https://reactjs.org/docs/conditional-rendering.html
+// to handle screen changes
 
+// import { set } from "lodash";
 import React, { useState, useEffect } from "react";
-import "../../../node_modules/font-awesome/css/font-awesome.min.css";
+// import "../../../node_modules/font-awesome/css/font-awesome.min.css";
 import "./QuizContainer.css";
-
-// -------------------------------------------------------------------------------------------- Actual format to handle
 
 export default function QuizContainer2(props) {
   const [myquestions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState({});
-  const [started, setStarted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // const [started, setStarted] = useState(false);
+  const [gameState, setGameState] = useState("init"); // other states are "ongoing", "results"
   const [quizLength, setQuizLength] = useState(0);
 
-  const [wrongAttempt, setWrongAttempt] = useState(0);
   const [playerScore, setPlayerScore] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [questionOrder, setQuestionOrder] = useState([]); //
 
-  const [gameover, setGameover] = useState(false);
-
   const [answered, setAnswered] = useState(false);
+
+  const [explain, setExplain] = useState(false);
+
+  const [loaded, setLoaded] = useState(false);
+
+  const [message, setMessage] = useState("");
 
   const realQuestions = [
     {
-      question: "what?",
+      question: "1. what?",
+      explanation: "a large amount of text",
       answers: [
         {
           answer: "something",
@@ -45,7 +49,52 @@ export default function QuizContainer2(props) {
       ],
     },
     {
-      question: "Who?",
+      question: "2. Who?",
+      explanation: "a large amount of text",
+      answers: [
+        {
+          answer: "someone",
+          correct: true,
+        },
+        {
+          answer: "someone else",
+          correct: false,
+        },
+        {
+          answer: "nobody",
+          correct: false,
+        },
+        {
+          answer: "ssss",
+          correct: false,
+        },
+      ],
+    },
+    {
+      question: "3. Why?",
+      explanation: "a large amount of text",
+      answers: [
+        {
+          answer: "someone",
+          correct: true,
+        },
+        {
+          answer: "someone else",
+          correct: false,
+        },
+        {
+          answer: "nobody",
+          correct: false,
+        },
+        {
+          answer: "ssss",
+          correct: false,
+        },
+      ],
+    },
+    {
+      question: "4. When?",
+      explanation: "a large amount of text",
       answers: [
         {
           answer: "someone",
@@ -69,21 +118,41 @@ export default function QuizContainer2(props) {
 
   // called when component loads
   useEffect(() => {
-    // generateQuestions(props.noteId);
-    setQuestions(realQuestions);
-    console.log("Quiz start!");
+    console.log("1. in component load");
+    // setQuestions(realQuestions); // replace with props from caller
+
+    setQuestions([]);
   }, []);
 
   // will be called when questions are populated
   useEffect(() => {
-    initStates();
+    console.log("2. in myquestion useffect");
+    if (myquestions.length === realQuestions.length) {
+      console.log("2.1 inside if");
+      initStates();
+    }
   }, [myquestions]);
 
-  // will be called when question order is definec
+  const initStates = () => {
+    console.log("init states", myquestions);
+    setQuizLength(myquestions.length);
+    setPlayerScore(0);
+    shuffleIndexes(myquestions.length); // this assigns questionOrder --> careful on setCurrentQuestion
+    setCurrentIndex(0);
+  };
+
+  // called when question order is defined
   useEffect(() => {
-    setCurrentQuestion(myquestions[questionOrder[0]]);
+    console.log("in questionOrder Effect");
+    if (myquestions.length > 0) {
+      // this keeps it from breaking
+      console.log("in questionOrder Effect>> inside of if condition");
+      setCurrentQuestion(myquestions[questionOrder[0]]);
+      setLoaded(true);
+    }
   }, [questionOrder]);
 
+  // when currentIndex increments, this will be called
   useEffect(() => {
     setCurrentQuestion(myquestions[questionOrder[currentIndex]]);
   }, [currentIndex]);
@@ -97,62 +166,6 @@ export default function QuizContainer2(props) {
     // console.log("currindex: ", currentIndex);
     // console.log("questionorder: ", questionOrder);
   });
-
-  const initStates = () => {
-    setQuizLength(myquestions.length);
-    setWrongAttempt(0);
-    setPlayerScore(0);
-    shuffleIndexes(myquestions.length); // this assigns questionOrder --> careful on setCurrentQuestion
-  };
-
-  // DONE
-  const generateQuestions = async () => {
-    console.log("in questiongeneration");
-    setLoading(true);
-    fetch("http://localhost:5000/notes/", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        title: "test title",
-        raw_json: props.fullnote.raw_json,
-      }),
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((json) => {
-        console.log("full resposnse:", json);
-        if (json[2] === 201) {
-          let transit_questions = json[1].map((q) => ({
-            question: q.question,
-            answers: q.answer,
-          }));
-          console.log("transit questions: ", transit_questions);
-          setQuestions(transit_questions);
-          setQuizLength(transit_questions.length);
-
-          // // checkIf New Questions
-          // let newQuestions = transit_questions.filter(
-          //   (x) => !myquestions.includes(x)
-          // );
-          // if (newQuestions.length > 0) {
-          //   newQuestions.map((aquestion) =>
-          //     setQuestions((myquestions) => [...myquestions, aquestion])
-          //   );
-          //   // await saveQuestions();
-          // } else {
-          //   console.log("no new questions");
-          // }
-        }
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.log("error occured while onGenerate:", error);
-        setLoading(false);
-      });
-  };
 
   // DONE -- careful with where i'm getting the size
   const shuffleIndexes = (size) => {
@@ -171,19 +184,34 @@ export default function QuizContainer2(props) {
   const checkAnswer = (e, isCorrect) => {
     // missing timeout after modifying background color.
     setAnswered(true);
+    if (answered) {
+      return;
+    }
 
     if (isCorrect) {
       setPlayerScore(playerScore + 1);
       // score+1
       // nextQuestion
       // console.log("correct answer");
-      e.target.style.backgroundColor = "#fff";
+      const oldcolor = "lightgray";
+      document.body.style.backgroundColor = "rgb(214,255,214)";
+      setTimeout(() => {
+        document.body.style.backgroundColor = oldcolor;
+      }, 1000);
     } else {
       // wrong+1
       // nextQuestion
-      // console.log("incorrect answer");
-      e.target.style.backgroundColor = "#ccc";
+      const oldcolor = "lightgray";
+      document.body.style.backgroundColor = "rgb(255,214,214)";
+      setTimeout(() => {
+        document.body.style.backgroundColor = oldcolor;
+      }, 1000);
     }
+  };
+
+  const showExplanation = () => {
+    console.log("called showExplanation", currentQuestion.explanation);
+    setExplain(!explain);
   };
 
   // called when the next button is clicked
@@ -201,120 +229,109 @@ export default function QuizContainer2(props) {
         // NextQuestion(currentIndex);
       }, 1000);
     } else {
-      setGameover(true);
+      // setGameover(true);
+      setGameState("results");
     }
   };
 
-  //closes score modal and resets game
-  const closeScoreModal = () => {
-    console.log("called closeScoreModal");
+  const resetGame = () => {
+    initStates();
+    setGameState("init");
   };
-
-  //function to close warning modal
-  const closeOptionModal = () => {
-    console.log("called closeOptionModal");
-  };
-
-  const loadQuestions = async () => {
-    // try: fetch from DB
-    // if empty : generate from python
-  };
-
-  function displayResults() {
-    console.log("in display resukts");
-
-    return (
-      <div className="modal-content-container">
-        <h1>Congratulations, Quiz Completed.</h1>
-
-        <div className="grade-details">
-          {/* <p>Attempts : 10</p> */}
-          <p>
-            Wrong Answers : <span id="wrong-answers"></span>
-          </p>
-          <p>Wrong Answers : {wrongAttempt}</p>
-          <p>
-            Right Answers : <span id="right-answers"></span>
-          </p>
-          <p>
-            Grade : <span id="grade-percentage"></span>%
-          </p>
-          <p>
-            <span id="remarks"></span>
-          </p>
-        </div>
-
-        <div className="modal-button-container">
-          <button onClick={closeScoreModal}>Continue</button>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div>
-      {loading ? (
-        <p>loading</p>
-      ) : (
-        <button
-          onClick={() => {
-            setStarted(!started);
-          }}
-        >
-          start
-        </button>
-      )}
-
-      {started ? (
-        <div>
-          <main>
-            <div className="modal-container" id="score-modal">
-              {gameover ? displayResults() : null}
+    <div className="big-root">
+      {/* <button
+        onClick={() => {
+          if (gameState === "init") setGameState("ongoing");
+          if (gameState === "ongoing") setGameState("results");
+          if (gameState === "results") setGameState("init");
+          console.log("aaa");
+        }}
+      >
+        DEBUG! toggle gameState
+      </button> */}
+      {loaded ? (
+        {
+          init: (
+            <div className="next-button-container">
+              <button
+                onClick={() => {
+                  setGameState("ongoing");
+                }}
+              >
+                Start
+              </button>
             </div>
+          ),
+          ongoing: (
+            <div>
+              {explain ? (
+                <div className="explanation-container">
+                  <p>{"... " + currentQuestion.explanation + " ..."}</p>
+                </div>
+              ) : null}
+              <div className="game-quiz-container">
+                <div className="game-details-container">
+                  <h1>
+                    Score : {playerScore} / {myquestions.length}
+                  </h1>
+                  <h1 onClick={showExplanation} className="clickable">
+                    Hint/Explanation
+                  </h1>
+                  <h1>
+                    Question : {currentIndex + 1} / {myquestions.length}
+                  </h1>
+                </div>
 
-            <div className="game-quiz-container">
-              <div className="game-details-container">
-                <h1>
-                  Score : {playerScore} / {myquestions.length}
-                </h1>
-                <h1>
-                  Question : {currentIndex + 1} / {myquestions.length}
-                </h1>
-              </div>
+                <div className="game-question-container">
+                  <h1>{currentQuestion.question}</h1>
+                </div>
 
-              <div className="game-question-container">
-                <h1 id="display-question">{currentQuestion.question}</h1>
-              </div>
-
-              <div className="game-options-container">
-                <div className="modal-container" id="option-modal">
-                  <div className="modal-content-container">
-                    <h1>Please Pick An Option</h1>
-
-                    <div className="modal-button-container">
-                      <button onClick={closeOptionModal}>
-                        what Continue is this
-                      </button>
-                    </div>
+                <div className="game-options-container">
+                  <div>
+                    {currentQuestion.answers.map((answer, index) => (
+                      <div className="answer-options">
+                        <p>{String.fromCharCode(65 + index)}</p>
+                        <button onClick={(e) => checkAnswer(e, answer.correct)}>
+                          {answer.answer}
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div>
-                  {currentQuestion.answers.map((question, index) => (
-                    <button onClick={(e) => checkAnswer(e, question.correct)}>
-                      {question.answer}
-                    </button>
-                  ))}
+
+                <div className="next-button-container">
+                  <button>Bad question?</button>
+                  <button onClick={handleNextQuestion}>Next Question</button>
                 </div>
               </div>
-
+            </div>
+          ),
+          results: (
+            <div className="results-container">
+              <div className="results-header">
+                <h1>Congratulations!</h1>
+                <h2>Quiz Completed</h2>
+              </div>
+              <div className="results-details">
+                <p>Wrong Answers : {quizLength - playerScore}</p>
+                <p>Right Answers : {playerScore}</p>
+                <p>Grade : {(playerScore / quizLength) * 100}%</p>
+                <p>
+                  <span id="remarks"></span>
+                </p>
+              </div>
               <div className="next-button-container">
-                <button onClick={handleNextQuestion}>Next Question</button>
+                <button onClick={resetGame}>Continue</button>
               </div>
             </div>
-          </main>
-        </div>
+          ),
+        }[gameState]
       ) : (
-        <p>notstarted</p>
+        <div className="no-quiz-message">
+          <h3>Select a saved quiz or create a new one.</h3>
+        </div>
       )}
     </div>
   );

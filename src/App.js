@@ -16,7 +16,8 @@ import Settings from "./components/Settings";
 // import QuestionContainer from "./components/unused/QuestionContainer";
 // import QEditor from "./components/unused/QEditor";
 // import QuizContainer from "./components/quiz/QuizContainer";
-import QuizContainer2 from "./components/quiz/QuizContainer_copy";
+// import QuizContainer2 from "./components/quiz/QuizContainer_copy";
+import QuizMenu from "./components/quiz/QuizMenu";
 
 function App() {
   const [showSettings, setShowSettings] = useState(false);
@@ -90,7 +91,7 @@ function App() {
       {questionMode ? (
         <div style={styles.qmode}>
           <div style={styles.qcontainer}>
-            <QuizContainer2 noteId={currentNoteId} fullnote={currentFullNote} />
+            <QuizMenu noteId={currentNoteId} fullnote={currentFullNote} />
           </div>
         </div>
       ) : (
