@@ -1,20 +1,23 @@
 // tabs taken from https://www.digitalocean.com/community/tutorials/react-tabs-component
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Tabs from "../utility/Tabs";
 import "../utility/Tabs.css";
 import NewQuizMenu from "./NewQuizMenu";
 import SavedQuizMenu from "./SavedQuizMenu";
-import QuizContainer from "./QuizContainer";
+// import QuizContainer from "./QuizContainer";
 import QuizContainer2 from "./QuizContainer_copy";
 
 export default function QuizMenu(props) {
-  const [activeQuiz, setActiveQuiz] = useState(false);
+  const [activeQuiz, setActiveQuiz] = useState({});
 
-  const startQuiz = (questions) => {
-    console.log("in parent startquiz");
-    // set activeTab = "Current QUiz"
-    // or... dynamically add the "Current Quiz" div to <Tabs /> + set it active
+  useEffect(() => {
+    console.log("changed active quiz: ", activeQuiz);
+  }, [activeQuiz]);
+
+  const loadQuiz = (quiz) => {
+    console.log("in set quiz: quiz: ", quiz);
+    setActiveQuiz(quiz);
   };
 
   return (
@@ -23,15 +26,20 @@ export default function QuizMenu(props) {
       <div style={styles.container}>
         <Tabs activeTab="New Quiz">
           <div label="New Quiz">
-            <NewQuizMenu fullnote={props.fullnote} startQuiz={startQuiz} />
+            <NewQuizMenu fullnote={props.fullnote} loadQuiz={loadQuiz} />
           </div>
           <div label="Saved Quizzes">
-            <SavedQuizMenu noteId={props.noteId} startQuiz={startQuiz} />
+            <SavedQuizMenu noteId={props.noteId} loadQuiz={loadQuiz} />
           </div>
           {/* TODO: Current quiz tab should dynamically appear only when a quiz is started */}
+          {/* OR - dynamic name + class on title (quiz/no quiz loaded) */}
           <div label="Current Quiz">
-            {/* <QuizContainer /> */}
-            <QuizContainer2 />
+            <QuizContainer2
+              quiz={activeQuiz}
+              date={"adate"}
+              numq={"numquestions"}
+              type="mc"
+            />
           </div>
         </Tabs>
       </div>

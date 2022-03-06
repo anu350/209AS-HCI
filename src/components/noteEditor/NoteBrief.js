@@ -5,6 +5,7 @@
 
 import React from "react";
 import { supabase } from "../../lib/supabaseClient";
+import "./NoteBrief.css";
 
 const getDate = (raw_timestamp) => {
   // console.log(raw_timestamp);                        // raw format: 2022-02-01T10:03:04+00:00
@@ -25,7 +26,9 @@ export default function NoteBrief(props) {
 
   return (
     <div style={styles.notebriefContainer}>
-      <button onClick={deleteNote}>delete</button>
+      <button className="delete-button" onClick={deleteNote}>
+        delete
+      </button>
       <div style={styles.flexBriefHeader}>
         <div>
           {props.note.title ? (

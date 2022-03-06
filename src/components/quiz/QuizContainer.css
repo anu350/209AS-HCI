@@ -159,3 +159,9 @@
 .no-quiz-message {
   color: rgb(114, 114, 114);
 }
+
+.start-banner {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}

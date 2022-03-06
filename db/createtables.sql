@@ -14,6 +14,7 @@ create table notes (
   note text,
   title text,
   raw_json json,
+  wordcount int4,
   -- tags_id int8[] references tags.id,
 
   primary key (id)
@@ -24,6 +25,16 @@ create table questions (
     created_at timestamp with time zone,
     question text,
     related_note uuid references notes.id,
+
+    primary key (id)
+);
+
+create table quizzes (
+  id uuid DEFAULT uuid_generate_v4 (),
+    created_at timestamp with time zone,
+    quiz json,
+    related_note uuid references notes.id,
+    related_note_last_edit_time timestamp with time zone,
 
     primary key (id)
 );

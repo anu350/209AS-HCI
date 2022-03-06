@@ -10,6 +10,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import MyEditor from "./DraftNote";
 import NoteBrief from "./NoteBrief";
+import "./NoteList.css";
 
 export default function NoteList(props) {
   const [notes, setNotes] = useState([]);
@@ -37,16 +38,6 @@ export default function NoteList(props) {
     // console.log("in effect of currnote: ", currentNote);
     // call to rerender draftnote here
   }, [currentNote]);
-
-  const noteHover = (event) => {
-    event.target.style.color = "purple";
-    // event.target.style.backgroundColor = "#ebebeb";
-  };
-
-  const stopNoteHover = (event) => {
-    event.target.style.color = "";
-    // event.target.style.backgroundColor = "";
-  };
 
   const briefClick = (clickedId) => {
     let thenote = notes.find((n) => n.id === clickedId);
@@ -95,7 +86,7 @@ export default function NoteList(props) {
     <div style={style.generalApp}>
       <div className="leftbar-container" style={style.leftBar}>
         <div className="searchbar-container" style={style.searchBar}>
-          <button style={style.newNote} onClick={addNote}>
+          <button className="newnote-button" onClick={addNote}>
             +
           </button>
         </div>
@@ -103,8 +94,7 @@ export default function NoteList(props) {
           {notes.length ? (
             notes.map((note) => (
               <div
-                onMouseEnter={noteHover}
-                onMouseLeave={stopNoteHover}
+                className="notebrief-each"
                 onClick={() => briefClick(note.id)}
               >
                 <NoteBrief
@@ -147,7 +137,7 @@ const style = {
     flexDirection: "column",
     borderStyle: "solid",
     borderWidth: "7px",
-    borderColor: "rgba(255,0,0,0.3)",
+    borderColor: "var(--theme-highlights-boxshadow-color)",
     // maxWidth: "25vw",
     minWidth: "340px",
     width: "360px",
@@ -157,7 +147,7 @@ const style = {
     flexDirection: "row-reverse",
     height: "50px",
     alignItems: "center",
-    backgroundColor: "rgba(255,0,0,0.3)",
+    backgroundColor: "var(--theme-highlights-light-color)",
   },
   noteList: {
     width: "100%",

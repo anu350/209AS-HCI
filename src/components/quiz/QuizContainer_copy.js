@@ -1,15 +1,9 @@
-// use https://reactjs.org/docs/conditional-rendering.html
-// to handle screen changes
-
-// import { set } from "lodash";
 import React, { useState, useEffect } from "react";
-// import "../../../node_modules/font-awesome/css/font-awesome.min.css";
 import "./QuizContainer.css";
 
 export default function QuizContainer2(props) {
   const [myquestions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState({});
-  // const [started, setStarted] = useState(false);
   const [gameState, setGameState] = useState("init"); // other states are "ongoing", "results"
   const [quizLength, setQuizLength] = useState(0);
 
@@ -22,8 +16,6 @@ export default function QuizContainer2(props) {
   const [explain, setExplain] = useState(false);
 
   const [loaded, setLoaded] = useState(false);
-
-  const [message, setMessage] = useState("");
 
   const realQuestions = [
     {
@@ -118,10 +110,11 @@ export default function QuizContainer2(props) {
 
   // called when component loads
   useEffect(() => {
-    console.log("1. in component load");
-    // setQuestions(realQuestions); // replace with props from caller
-
-    setQuestions([]);
+    console.log("1. in component load: from previous: ", props.quiz);
+    if (Object.entries(props.quiz).length !== 0) {
+      setQuestions(props.quiz); // replace with props from caller
+    }
+    // setQuestions([]);
   }, []);
 
   // will be called when questions are populated
@@ -157,15 +150,15 @@ export default function QuizContainer2(props) {
     setCurrentQuestion(myquestions[questionOrder[currentIndex]]);
   }, [currentIndex]);
 
-  useEffect(() => {
-    // console.log("quizLength: ", quizLength);
-    // console.log("wrongAttempt: ", wrongAttempt);
-    // console.log("playerScore: ", playerScore);
-    // console.log("myquestions: ", myquestions);
-    // console.log("currquestion: ", currentQuestion);
-    // console.log("currindex: ", currentIndex);
-    // console.log("questionorder: ", questionOrder);
-  });
+  // useEffect(() => {
+  // console.log("quizLength: ", quizLength);
+  // console.log("wrongAttempt: ", wrongAttempt);
+  // console.log("playerScore: ", playerScore);
+  // console.log("myquestions: ", myquestions);
+  // console.log("currquestion: ", currentQuestion);
+  // console.log("currindex: ", currentIndex);
+  // console.log("questionorder: ", questionOrder);
+  // });
 
   // DONE -- careful with where i'm getting the size
   const shuffleIndexes = (size) => {
@@ -190,19 +183,14 @@ export default function QuizContainer2(props) {
 
     if (isCorrect) {
       setPlayerScore(playerScore + 1);
-      // score+1
-      // nextQuestion
-      // console.log("correct answer");
       const oldcolor = "lightgray";
-      document.body.style.backgroundColor = "rgb(214,255,214)";
+      document.body.style.backgroundColor = "rgb(214,255,214)"; // a light green
       setTimeout(() => {
         document.body.style.backgroundColor = oldcolor;
       }, 1000);
     } else {
-      // wrong+1
-      // nextQuestion
       const oldcolor = "lightgray";
-      document.body.style.backgroundColor = "rgb(255,214,214)";
+      document.body.style.backgroundColor = "rgb(255,214,214)"; // a light red
       setTimeout(() => {
         document.body.style.backgroundColor = oldcolor;
       }, 1000);
@@ -254,14 +242,22 @@ export default function QuizContainer2(props) {
       {loaded ? (
         {
           init: (
-            <div className="next-button-container">
-              <button
-                onClick={() => {
-                  setGameState("ongoing");
-                }}
-              >
-                Start
-              </button>
+            <div className="start-banner">
+              <div>
+                <h2>Selected Quiz</h2>
+                <h4>{props.numq} questions</h4>
+                <h4>Date: {props.date}</h4>
+                <h4>Type: {props.type}</h4>
+              </div>
+              <div className="next-button-container">
+                <button
+                  onClick={() => {
+                    setGameState("ongoing");
+                  }}
+                >
+                  Start
+                </button>
+              </div>
             </div>
           ),
           ongoing: (
