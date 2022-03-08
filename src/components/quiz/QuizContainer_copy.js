@@ -120,7 +120,7 @@ export default function QuizContainer2(props) {
   // will be called when questions are populated
   useEffect(() => {
     console.log("2. in myquestion useffect");
-    if (myquestions.length === realQuestions.length) {
+    if (myquestions.length === props.quiz.length) {
       console.log("2.1 inside if");
       initStates();
     }
@@ -246,8 +246,8 @@ export default function QuizContainer2(props) {
               <div>
                 <h2>Selected Quiz</h2>
                 <h4>{props.numq} questions</h4>
-                <h4>Date: {props.date}</h4>
-                <h4>Type: {props.type}</h4>
+                <h4>Created on {props.date}</h4>
+                {/* <h4>Type: {props.type}</h4> */}
               </div>
               <div className="next-button-container">
                 <button
@@ -313,7 +313,7 @@ export default function QuizContainer2(props) {
               <div className="results-details">
                 <p>Wrong Answers : {quizLength - playerScore}</p>
                 <p>Right Answers : {playerScore}</p>
-                <p>Grade : {(playerScore / quizLength) * 100}%</p>
+                <p>Grade : {((playerScore / quizLength) * 100).toFixed()}%</p>
                 <p>
                   <span id="remarks"></span>
                 </p>

@@ -21,10 +21,6 @@ export default function NoteList(props) {
     fetchNotes();
 
     if (props.persistFullNote) {
-      // console.log(
-      //   "in notelist-> useeffect -> persistfullnote",
-      //   props.persistFullNote
-      // );
       setCurrentNote(props.persistFullNote);
     } else if (notes.length) {
       console.log("notelist/usefect notes", notes);
@@ -34,10 +30,7 @@ export default function NoteList(props) {
   }, []);
 
   // This is called everytime currentNote changes -- via a setCurrentNote() call
-  useEffect(() => {
-    // console.log("in effect of currnote: ", currentNote);
-    // call to rerender draftnote here
-  }, [currentNote]);
+  useEffect(() => {}, [currentNote]);
 
   const briefClick = (clickedId) => {
     let thenote = notes.find((n) => n.id === clickedId);
@@ -47,7 +40,6 @@ export default function NoteList(props) {
   };
 
   const triggerReload = () => {
-    // console.log("triggered reload in nodelist");
     fetchNotes().catch(console.error);
     setCurrentNote(notes[0]);
   };
@@ -56,7 +48,7 @@ export default function NoteList(props) {
     let { data: newnotes, error } = await supabase
       .from("notes")
       .select("*")
-      .order("last_edit_time", { ascending: false }); // <----------- parametrize to let user pick sorting method
+      .order("last_edit_time", { ascending: false }); // <----------- could parametrize to let user pick sorting method
     if (error) console.log("error fetching", error);
     else {
       // console.log("in fetchnotes:", newnotes);
@@ -73,6 +65,7 @@ export default function NoteList(props) {
       last_edit_time: creation_time,
       title: "Untitled Note",
       note: "",
+      wordcount: 0,
     }); //key vals for DB
 
     if (error) {
@@ -114,6 +107,7 @@ export default function NoteList(props) {
         note={currentNote}
         key={"note" + currentNote.id}
         updatecallback={fetchNotes}
+        wordcount={currentNote.wordcount}
       />
     </div>
   );

@@ -85,6 +85,7 @@ class NoteList(Resource):
         parser.add_argument("title")
         parser.add_argument("content")
         parser.add_argument("raw_json")
+        parser.add_argument("num_questions")
         # parser.add_argument("tags")
         # parser.add_argument("questions")
         args = parser.parse_args()
@@ -97,13 +98,19 @@ class NoteList(Resource):
             'tags': [],
             'questions': []
         }
+        # print('--------------------------\n\n\n')
+        # print('args[raw_json]')
+        # print(args['raw_json'])
+        # print(NOTES[note_id]['raw_json'])
         thenote = json.loads(args['raw_json'])
         concat_note = ""
         for i in range(len(thenote["blocks"])):
             concat_note += thenote["blocks"][i]["text"]
 
         # output = nlp(concat_note)
-        output = nlp.generate(concat_note, answer_style="multiple_choice")
+        # print(args["num_questions"])
+        output = nlp.generate(
+            concat_note, answer_style="multiple_choice", num_questions=int(args["num_questions"]))
         # print(output)
         return [NOTES[note_id], output, 201]
 

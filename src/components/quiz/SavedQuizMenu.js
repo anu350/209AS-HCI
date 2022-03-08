@@ -116,19 +116,9 @@ export default function SavedQuizMenu(props) {
   const fetchQuizzes = async (my_id) => {
     const { data, error } = await supabase
       .from("quizzes")
-      .select(
-        `
-        id, 
-        created_at, 
-        type, 
-        index, 
-        size,
-        quiz, 
-        notes:related_note (title)
-      `
-      )
+      .select()
       .eq("related_note", props.noteId)
-      .order("index", { ascending: true });
+      .order("created_at", { ascending: true });
     if (error) console.log("error fetching questions", error);
     else {
       if (data.length) {
@@ -137,8 +127,22 @@ export default function SavedQuizMenu(props) {
     }
   };
 
+  const handleQuizSelection = async (quiz_id) => {
+    // console.log("in handleQuizSelection");
+    // fetch questions with quizid
+    // let quiz_id_dummy = "186e654e-e632-4345-aa07-3b7cfae4262a";
+
+    const { data, error } = await supabase
+      .from("questions")
+      .select()
+      .match({ related_quiz: quiz_id });
+    if (error) console.log("error deleting quiz");
+
+    // console.log("post response, data: ", data);
+    props.loadQuiz(quiz_id, data);
+  };
+
   const deleteQuiz = async (quiz_id) => {
-    // console.log("deleting quiz with id:", quiz_id);
     const { data, error } = await supabase
       .from("quizzes")
       .delete()
@@ -156,19 +160,20 @@ export default function SavedQuizMenu(props) {
               {quizzes.map((myQ, index) => (
                 <div key={index} className="savedQuizMenu-subcontainer">
                   <div className="savedQuizMenu-title-container">
-                    <h1>Quiz #{myQ.index + 1}</h1>
+                    <h1>Quiz #{index + 1}</h1>
                     <div className="buttons">
-                      {/* <button onClick={() => props.loadQuiz(myQ.quiz)}>Start</button> */}
-                      <button onClick={() => props.loadQuiz(realQuestions)}>
-                        Start
+                      {/* <button onClick={() => props.loadQuiz(realQuestions)}> */}
+                      <button onClick={() => handleQuizSelection(myQ.id)}>
+                        Load
                       </button>
                       <button onClick={() => deleteQuiz(myQ.id)}>Delete</button>
                     </div>
                   </div>
                   <div className="savedQuizMenu-options-container">
-                    <p>Quiz type: {myQ.type}</p>
-                    <p># questions: {myQ.size}</p>
-                    <p>Creation Date: {myQ.created_at}</p>
+                    {/* <p>Quiz type: {myQ.quiztype}</p> */}
+                    <p>Number of Questions: {myQ.size}</p>
+                    <p>Creation Date: {myQ.created_at.substring(0, 10)}</p>
+                    <p>Has bad questions?</p>
                     <p>Difficulty: ?</p>
                   </div>
                 </div>
