@@ -1,0 +1,35 @@
+.tabs {
+  height: 100%;
+}
+
+.tab-content {
+  height: 100%;
+}
+
+.tab-list {
+  border-bottom: 1px solid var(--theme-highlights-light-color);
+  padding-left: 0;
+  margin-left: 40px;
+  cursor: pointer;
+}
+
+.tab-list-item {
+  display: inline-block;
+  list-style: none;
+  margin-bottom: -1px;
+  padding: 0.5rem 1rem;
+  font-size: 20px;
+  /* background-color: rgb(223, 223, 223); */
+  background-color: var(--theme-highlights-lighter-color);
+}
+
+.tab-list-active {
+  background-color: white;
+  border: solid #ccc;
+  border-width: 1px 1px 0 1px;
+}
+
+.tab-disabled {
+  color: blue;
+  background-color: red;
+}

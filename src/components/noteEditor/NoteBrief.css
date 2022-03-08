@@ -1,0 +1,9 @@
+.delete-button {
+  border: 2px solid gray;
+  cursor: pointer;
+  background: none;
+}
+
+.delete-button:hover {
+  background-color: var(--theme-highlights-light-color);
+}

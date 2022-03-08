@@ -7,9 +7,10 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 import MyEditor from "./DraftNote";
 import NoteBrief from "./NoteBrief";
+import "./NoteList.css";
 
 export default function NoteList(props) {
   const [notes, setNotes] = useState([]);
@@ -20,10 +21,6 @@ export default function NoteList(props) {
     fetchNotes();
 
     if (props.persistFullNote) {
-      // console.log(
-      //   "in notelist-> useeffect -> persistfullnote",
-      //   props.persistFullNote
-      // );
       setCurrentNote(props.persistFullNote);
     } else if (notes.length) {
       console.log("notelist/usefect notes", notes);
@@ -33,20 +30,7 @@ export default function NoteList(props) {
   }, []);
 
   // This is called everytime currentNote changes -- via a setCurrentNote() call
-  useEffect(() => {
-    // console.log("in effect of currnote: ", currentNote);
-    // call to rerender draftnote here
-  }, [currentNote]);
-
-  const noteHover = (event) => {
-    event.target.style.color = "purple";
-    // event.target.style.backgroundColor = "#ebebeb";
-  };
-
-  const stopNoteHover = (event) => {
-    event.target.style.color = "";
-    // event.target.style.backgroundColor = "";
-  };
+  useEffect(() => {}, [currentNote]);
 
   const briefClick = (clickedId) => {
     let thenote = notes.find((n) => n.id === clickedId);
@@ -56,7 +40,6 @@ export default function NoteList(props) {
   };
 
   const triggerReload = () => {
-    // console.log("triggered reload in nodelist");
     fetchNotes().catch(console.error);
     setCurrentNote(notes[0]);
   };
@@ -65,7 +48,7 @@ export default function NoteList(props) {
     let { data: newnotes, error } = await supabase
       .from("notes")
       .select("*")
-      .order("last_edit_time", { ascending: false }); // <----------- parametrize to let user pick sorting method
+      .order("last_edit_time", { ascending: false }); // <----------- could parametrize to let user pick sorting method
     if (error) console.log("error fetching", error);
     else {
       // console.log("in fetchnotes:", newnotes);
@@ -82,6 +65,7 @@ export default function NoteList(props) {
       last_edit_time: creation_time,
       title: "Untitled Note",
       note: "",
+      wordcount: 0,
     }); //key vals for DB
 
     if (error) {
@@ -95,7 +79,7 @@ export default function NoteList(props) {
     <div style={style.generalApp}>
       <div className="leftbar-container" style={style.leftBar}>
         <div className="searchbar-container" style={style.searchBar}>
-          <button style={style.newNote} onClick={addNote}>
+          <button className="newnote-button" onClick={addNote}>
             +
           </button>
         </div>
@@ -103,8 +87,7 @@ export default function NoteList(props) {
           {notes.length ? (
             notes.map((note) => (
               <div
-                onMouseEnter={noteHover}
-                onMouseLeave={stopNoteHover}
+                className="notebrief-each"
                 onClick={() => briefClick(note.id)}
               >
                 <NoteBrief
@@ -124,6 +107,7 @@ export default function NoteList(props) {
         note={currentNote}
         key={"note" + currentNote.id}
         updatecallback={fetchNotes}
+        wordcount={currentNote.wordcount}
       />
     </div>
   );
@@ -147,7 +131,7 @@ const style = {
     flexDirection: "column",
     borderStyle: "solid",
     borderWidth: "7px",
-    borderColor: "rgba(255,0,0,0.3)",
+    borderColor: "var(--theme-highlights-boxshadow-color)",
     // maxWidth: "25vw",
     minWidth: "340px",
     width: "360px",
@@ -157,7 +141,7 @@ const style = {
     flexDirection: "row-reverse",
     height: "50px",
     alignItems: "center",
-    backgroundColor: "rgba(255,0,0,0.3)",
+    backgroundColor: "var(--theme-highlights-light-color)",
   },
   noteList: {
     width: "100%",

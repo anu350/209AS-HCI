@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../lib/supabaseClient";
-import Question from "./Question";
+import { supabase } from "../../lib/supabaseClient";
+import Question from "../quiz/Question";
 
 export default function QuestionContainer(props) {
   const [myquestions, setQuestions] = useState([]);

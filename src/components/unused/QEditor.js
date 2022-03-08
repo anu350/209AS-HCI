@@ -5,7 +5,7 @@
 import React, { Component } from "react";
 import "draft-js/dist/Draft.css";
 import debounce from "lodash/debounce";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 
 import {
   Editor,
