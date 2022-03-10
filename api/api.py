@@ -24,54 +24,19 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 
-NOTES = {
-    '1': {
-        'title': 'Note1',
-        'content': 'fhsdjk',
-        'tags': ['tag1', 'tag2'],
-        'questions': {
-            '1': {
-                'q': 'question1?',
-                'difficulty': 10
-            },
-            '2': {
-                'q': 'question2?',
-                'difficulty': 5
-            }
-        }
-    },
-    '2': {
-        'title': 'Note2',
-        'content': 'hffdshjkf',
-        'tags': ['tag1', 'tag2'],
-        'questions': {
-            '1': {
-                'q': 'question3?',
-                'difficulty': 7
-            },
-            '2': {
-                'q': 'question4?',
-                'difficulty': 3
-            }
-        }
-    },
-}
-
 SAMPLE_Qs = [
     {"question": "Why did the chicken cross the road?",
-     "important_stuff":
+     "explanation": "a chunk from the source note",
+     "answers":
          [{
-             'text': "sample sentence that should be highlighted.",
-             'offset': 3,
-             'length': 14,
+             'answer': "answer 1",
+             'correct': True,
          },
              {
-             'text': "another sentence that is important.",
-             'offset': 21,
-             'length': 16,
+             'answer': "answer 2.",
+             'correct': False,
          }]
      },
-
 ]
 
 parser = reqparse.RequestParser()
@@ -79,87 +44,29 @@ parser = reqparse.RequestParser()
 
 class NoteList(Resource):
     def get(self):
-        return NOTES
+        return "blank"
 
     def post(self):
-        parser.add_argument("title")
-        parser.add_argument("content")
         parser.add_argument("raw_json")
         parser.add_argument("num_questions")
-        # parser.add_argument("tags")
-        # parser.add_argument("questions")
         args = parser.parse_args()
-        note_id = int(max(NOTES.keys())) + 1
-        note_id = '%i' % note_id
-        NOTES[note_id] = {
-            'title': args['title'],
-            'content': args['content'],
-            'raw_json': args['raw_json'],
-            'tags': [],
-            'questions': []
-        }
-        # print('--------------------------\n\n\n')
-        # print('args[raw_json]')
-        # print(args['raw_json'])
-        # print(NOTES[note_id]['raw_json'])
+
         thenote = json.loads(args['raw_json'])
         concat_note = ""
         for i in range(len(thenote["blocks"])):
             concat_note += thenote["blocks"][i]["text"]
 
         # output = nlp(concat_note)
-        # print(args["num_questions"])
         output = nlp.generate(
             concat_note, answer_style="multiple_choice", num_questions=int(args["num_questions"]))
-        # print(output)
-        return [NOTES[note_id], output, 201]
 
+        # callGetExplanationsAroundHere()
 
-class Note(Resource):
-    def get(self, note_id):
-        if note_id not in NOTES:
-            return "not found", 404
-        else:
-            return NOTES[note_id]
-
-    def put(self, note_id):
-        parser.add_argument("title")
-        parser.add_argument("content")
-        # parser.add_argument("tags")
-        # parser.add_argument("questions")
-        args = parser.parse_args()
-        if note_id not in NOTES:
-            return "record not found", 404
-        else:
-            note = NOTES[note_id]
-            note["title"] = args["title"] if args["title"] is not None else note["title"]
-            note["content"] = args["content"] if args["content"] is not None else note["content"]
-            # note["spec"] = args["spec"] if args["spec"] is not None else note["spec"]
-            return note, 200
-
-    def delete(self, note_id):
-        if note_id not in NOTES:
-            return "not found", 404
-        else:
-            del NOTES[note_id]
-            return '', 204
-
-
-class GenerateTags(Resource):
-    def get(self, note_id):
-        return "called gentags {}".format(note_id), 200
-
-
-class GenerateQuestions(Resource):
-    def get(self, note_id):
-        return "called genqs {}".format(note_id), 200
+        return [output, 201]
 
 
 # add routes
 api.add_resource(NoteList, '/notes/')
-api.add_resource(Note, '/notes/<note_id>')
-api.add_resource(GenerateTags, '/notes/<note_id>/gentags')
-api.add_resource(GenerateQuestions, '/notes/<note_id>/genqs')
 
 if __name__ == "__main__":
     app.run(debug=True)

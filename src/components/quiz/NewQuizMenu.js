@@ -54,6 +54,7 @@ export default function NewQuizMenu(props) {
         return {
           question: q.question,
           answers: q.answers,
+          explanation: q.explanation,
           idx: idx,
           badquestion: false,
           related_quiz: id,
@@ -87,8 +88,8 @@ export default function NewQuizMenu(props) {
       })
       .then((json) => {
         // console.log("full resposnse:", json);
-        if (json[2] === 201) {
-          let transit_questions = json[1].map((q) => ({
+        if (json[1] === 201) {
+          let transit_questions = json[0].map((q) => ({
             question: q.question,
             answers: q.answer,
           }));
@@ -121,9 +122,6 @@ export default function NewQuizMenu(props) {
   return (
     <div className="newQuizMenu-container">
       {loading ? <p>Loading...</p> : null}
-      <button onClick={() => saveQuiz().then((value) => console.log(value))}>
-        log current note
-      </button>
       <div className="newQuizMenu-subcontainer">
         <div>
           <h1>Multiple choice</h1>
