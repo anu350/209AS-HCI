@@ -1,4 +1,8 @@
-// missing: calling quiz start + shift to current quiz
+// done:
+// - dynamic load bad question option
+// missing: 
+// - fix delete quiz - broken due to table split update
+
 
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
@@ -143,16 +147,23 @@ export default function SavedQuizMenu(props) {
   };
 
   const deleteQuiz = async (quiz_id) => {
+
+    // first delete questions then quiz
+
+    supabase.from("questions").delete().match({ related_quiz: quiz_id }) //.then((data, error) => { console.log(data.data) })
+
     const { data, error } = await supabase
       .from("quizzes")
       .delete()
       .match({ id: quiz_id });
     if (error) console.log("error deleting quiz");
+
+    // refetch
+    fetchQuizzes();
   };
 
   return (
     <div className="savedQuizMenu-container">
-      {/* <button onClick={fetchQuizzes}>fetchquestions</button> */}
       {
         {
           false: (
@@ -166,6 +177,10 @@ export default function SavedQuizMenu(props) {
                       <button onClick={() => handleQuizSelection(myQ.id)}>
                         Load
                       </button>
+                      {myQ.badquestion_counter > 0 ? <button onClick={() => handleQuizSelection(myQ.id)}>
+                        Load Good Only
+                      </button> : null}
+
                       <button onClick={() => deleteQuiz(myQ.id)}>Delete</button>
                     </div>
                   </div>
@@ -173,8 +188,8 @@ export default function SavedQuizMenu(props) {
                     {/* <p>Quiz type: {myQ.quiztype}</p> */}
                     <p>Number of Questions: {myQ.size}</p>
                     <p>Creation Date: {myQ.created_at.substring(0, 10)}</p>
-                    <p>Has bad questions?</p>
-                    <p>Difficulty: ?</p>
+                    <p># bad questions: {myQ.badquestion_counter}</p>
+                    {/* <p>Difficulty: ?</p> */}
                   </div>
                 </div>
               ))}
