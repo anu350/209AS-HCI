@@ -23,12 +23,13 @@ create table notes (
 create table quizzes (
   id uuid DEFAULT uuid_generate_v4 (),
     created_at timestamp with time zone,
-    quiz json,
+    -- quiz json,
     related_note uuid references notes(id),
     related_note_last_edit_time timestamp with time zone,
     quiztype text,
-    idx int4,
+    -- idx int4,
     size int4,
+    badquestion_counter int4,
 
     primary key (id)
 );

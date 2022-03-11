@@ -1,7 +1,12 @@
+// Latest update: handles bad questions, updates both question db and quizzes db(with a counter of how many bad questions)
+
 import React, { useState, useEffect } from "react";
 import "./QuizContainer.css";
+import { supabase } from '../../lib/supabaseClient';
+import { map } from "lodash";
 
 export default function QuizContainer2(props) {
+
   const [myquestions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState({});
   const [gameState, setGameState] = useState("init"); // other states are "ongoing", "results"
@@ -12,9 +17,7 @@ export default function QuizContainer2(props) {
   const [questionOrder, setQuestionOrder] = useState([]); //
 
   const [answered, setAnswered] = useState(false);
-
   const [explain, setExplain] = useState(false);
-
   const [loaded, setLoaded] = useState(false);
 
   const realQuestions = [
@@ -110,9 +113,9 @@ export default function QuizContainer2(props) {
 
   // called when component loads
   useEffect(() => {
-    console.log("1. in component load: from previous: ", props.quiz);
+    console.log("1. in component load: from previous: ", props.quiz); // each question has idx. i guess no need for quiz id
     if (Object.entries(props.quiz).length !== 0) {
-      setQuestions(props.quiz); // replace with props from caller
+      setQuestions(props.quiz);
     }
     // setQuestions([]);
   }, []);
@@ -205,7 +208,7 @@ export default function QuizContainer2(props) {
   // called when the next button is clicked
   const handleNextQuestion = () => {
     if (!answered) {
-      // pop up message telling user to select an answer
+      // pop up message telling user to select an answer -----------------------------------------
       console.log("need to answer first");
       return;
     }
@@ -222,10 +225,61 @@ export default function QuizContainer2(props) {
     }
   };
 
+  const handleBadQuestion = async (questionid, quest) => {
+    // improvements - pass only the bool state, not the entire object.
+    const { data, error } = await supabase
+      .from('questions')
+      .update({ badquestion: !quest.badquestion })
+      .match({ id: questionid })
+
+    // change state of current question -- to reflect toggling
+    setCurrentQuestion({ ...currentQuestion, badquestion: !quest.badquestion })
+    updateQuizzes();
+
+  }
+
   const resetGame = () => {
+    // uploadBadQuestionStat();
     initStates();
     setGameState("init");
+
   };
+
+  const updateQuizzes = async () => {
+    let c = await countBadQuestions();
+    // console.log(c);
+    updateBadQuestionCounter(c);
+    // if c>0 , bad questions in existence
+
+  }
+
+  const updateBadQuestionCounter = async (c) => {
+    const { data, error } = await supabase
+      .from("quizzes")
+      .update({ badquestion_counter: c })
+      .match({ id: props.quizid })
+    console.log("data from updatebadquestioncounter", data);
+  }
+
+  const countBadQuestions = async () => {
+    let x = supabase.from("questions")
+      .select('badquestion')
+      .match({ related_quiz: props.quizid })
+      .then((data, error) => {
+        return data.data;
+      }).then((bool_array) => {
+        let acounter = 0;
+        for (let i = 0; i < bool_array.length; i++) {
+          console.log(bool_array[i].badquestion);
+          if (bool_array[i].badquestion) {
+            acounter++;
+          }
+        }
+        return acounter;
+      })
+
+    return await x;
+  }
 
   return (
     <div className="big-root">
@@ -236,6 +290,7 @@ export default function QuizContainer2(props) {
           if (gameState === "results") setGameState("init");
           console.log("aaa");
         }}
+
       >
         DEBUG! toggle gameState
       </button> */}
@@ -247,6 +302,7 @@ export default function QuizContainer2(props) {
                 <h2>Selected Quiz</h2>
                 <h4>{props.numq} questions</h4>
                 <h4>Created on {props.date}</h4>
+                <p>Disclaimer, some of the questions might be ill posed and be incorrect. Make sure to validate facts...</p>
                 {/* <h4>Type: {props.type}</h4> */}
               </div>
               <div className="next-button-container">
@@ -298,7 +354,10 @@ export default function QuizContainer2(props) {
                 </div>
 
                 <div className="next-button-container">
-                  <button>Bad question?</button>
+                  <button onClick={() => handleBadQuestion(currentQuestion.id, currentQuestion)}>
+                    {/* Bad question? */}
+                    {currentQuestion.badquestion ? "Mark as good question" : "Mark as bad question"}
+                  </button>
                   <button onClick={handleNextQuestion}>Next Question</button>
                 </div>
               </div>
@@ -319,6 +378,7 @@ export default function QuizContainer2(props) {
                 </p>
               </div>
               <div className="next-button-container">
+
                 <button onClick={resetGame}>Continue</button>
               </div>
             </div>
