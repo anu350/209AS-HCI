@@ -11,6 +11,12 @@ from transformers import (
 )
 from typing import Any, List, Mapping, Tuple
 
+import requests
+import boto3
+sagemaker_runtime = boto3.client("sagemaker-runtime", region_name='us-east-1')
+qg_endpoint_name = 'huggingface-pytorch-inference-2022-03-07-00-13-19-673'
+qa_endpoint_name = 'huggingface-pytorch-inference-2022-03-08-04-39-27-316'
+
 
 class QuestionGenerator:
     """A transformer-based NLP system for generating reading comprehension-style questions from
@@ -264,12 +270,19 @@ class QuestionGenerator:
         """Takes qg_input which is the concatenated answer and context, and uses it to generate
         a question sentence. The generated question is decoded and then returned.
         """
-        encoded_input = self._encode_qg_input(qg_input)
-        output = self.qg_model.generate(input_ids=encoded_input["input_ids"])
-        question = self.qg_tokenizer.decode(
-            output[0],
-            skip_special_tokens=True
-        )
+        #encoded_input = self._encode_qg_input(qg_input)
+        #output = self.qg_model.generate(input_ids=encoded_input["input_ids"])
+
+        body = {
+            'inputs': qg_input
+        }
+        response = sagemaker_runtime.invoke_endpoint(EndpointName=qg_endpoint_name, ContentType='application/json', Body=bytes(json.dumps(body), 'utf-8'))
+
+        #question = self.qg_tokenizer.decode(
+        #    output[0],
+        #    skip_special_tokens=True
+        #)
+        question = response['Body'].read().decode('utf-8')
         return question
 
     def _encode_qg_input(self, qg_input: str) -> torch.tensor:
