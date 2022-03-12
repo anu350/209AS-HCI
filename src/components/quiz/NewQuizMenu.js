@@ -88,10 +88,11 @@ export default function NewQuizMenu(props) {
       })
       .then((json) => {
         // console.log("full resposnse:", json);
-        if (json[1] === 201) {
-          let transit_questions = json[0].map((q) => ({
+        if (json[2] === 201) {
+          let transit_questions = json[1].map((q) => ({
             question: q.question,
             answers: q.answer,
+            explanation: q.explanation,
           }));
           // console.log("transit questions: ", transit_questions);
           setQuestions(transit_questions);

@@ -66,15 +66,15 @@ SAMPLE_Qs = [
              'correct': True,
          },
              {
-             'answer' : "answer 2",
-             'correct' : False,
+             'answer': "answer 2",
+             'correct': False,
          }]
      },
 ]
 
 parser = reqparse.RequestParser()
 
-        
+
 class NoteList(Resource):
     def get(self):
         return NOTES
@@ -108,40 +108,45 @@ class NoteList(Resource):
         # output = nlp(concat_note)
         # print(args["num_questions"])
 
-        ### During thie nlp.generate, return explanation 
+        # During thie nlp.generate, return explanation
         [qa_list, qg_hint, gen_questions] = nlp.generate(
             concat_note, answer_style="multiple_choice", num_questions=int(args["num_questions"]))
-        
+
         # Get contexts by tag
-        context= []
+        context = []
         for text in qg_hint:
             ar = text.split("<context>")
-        context.append(ar[1])
+            context.append(ar[1])
 
         # Create dictionary with questions and hints
         question_hint_dict = {}
 
-        for x in range(0,len(gen_questions)):
-            question_hint_dict[gen_questions[x]] = context[x] 
+        #
+
+        for x in range(0, len(gen_questions)):
+            question_hint_dict[gen_questions[x]] = context[x]
 
         # Create a reduced set of question/hints - DONT REALLY NEED THIS DICT
         reduced_question_hint_dict = {}
 
         # Must check if its a substring since entries in dict may not exactly match
         for x in range(0, len(qa_list)):
-            qa_list_str = qa_list[x]["question"] #Contains string of question being asked
-            for question in  question_hint_dict:
+            # Contains string of question being asked
+            qa_list_str = qa_list[x]["question"]
+            for question in question_hint_dict:
                 if (qa_list_str in question):
                     qa_list[x]["explanation"] = question_hint_dict[question]
-                    reduced_question_hint_dict[qa_list_str] = question_hint_dict[question]    
-    
-        #Check if this works 
+                    reduced_question_hint_dict[qa_list_str] = question_hint_dict[question]
+
+        # Check if this works
         #ind = 1
-        #for question in reduced_question_hint_dict:
+        # for question in reduced_question_hint_dict:
         #    print("Question", ind, ")", question)
         #    print("Context: ", reduced_question_hint_dict[question])
         #    print("\n")
         #    ind = ind +1
+        print("debug---------\n")
+        print(qa_list)
 
         return [NOTES[note_id], qa_list, 201]
 

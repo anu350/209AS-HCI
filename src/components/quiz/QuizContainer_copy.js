@@ -320,7 +320,7 @@ export default function QuizContainer2(props) {
             <div>
               {explain ? (
                 <div className="explanation-container">
-                  <p>{"... " + currentQuestion.explanation + " ..."}</p>
+                  <p>{"\"" + currentQuestion.explanation + "\""}</p>
                 </div>
               ) : null}
               <div className="game-quiz-container">
