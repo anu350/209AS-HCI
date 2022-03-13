@@ -20,6 +20,8 @@ export default function QuizContainer2(props) {
   const [explain, setExplain] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
+  const [qmessage, setQmessage] = useState("");
+
   const realQuestions = [
     {
       question: "1. what?",
@@ -209,7 +211,14 @@ export default function QuizContainer2(props) {
   const handleNextQuestion = () => {
     if (!answered) {
       // pop up message telling user to select an answer -----------------------------------------
-      console.log("need to answer first");
+      // console.log("need to answer first");
+      setQmessage("Need to answer first")
+      setTimeout(() => {
+
+        setQmessage("");
+        // NextQuestion(currentIndex);
+      }, 2000);
+
       return;
     }
 
@@ -299,10 +308,10 @@ export default function QuizContainer2(props) {
           init: (
             <div className="start-banner">
               <div>
-                <h2>Selected Quiz</h2>
+                <h2>Quiz is Ready</h2>
                 <h4>{props.numq} questions</h4>
-                <h4>Created on {props.date}</h4>
-                <p>Disclaimer, some of the questions might be ill posed and be incorrect. Make sure to validate facts...</p>
+                {/* <h4>Created on {props.date}</h4> */}
+                <p>Disclaimer, some of the questions might be ill posed or mark incorrect answers as correct ones. Make sure to validate facts.</p>
                 {/* <h4>Type: {props.type}</h4> */}
               </div>
               <div className="next-button-container">
@@ -329,7 +338,7 @@ export default function QuizContainer2(props) {
                     Score : {playerScore} / {myquestions.length}
                   </h1>
                   <h1 onClick={showExplanation} className="clickable">
-                    Hint/Explanation
+                    Show Explanation
                   </h1>
                   <h1>
                     Question : {currentIndex + 1} / {myquestions.length}
@@ -358,6 +367,7 @@ export default function QuizContainer2(props) {
                     {/* Bad question? */}
                     {currentQuestion.badquestion ? "Mark as good question" : "Mark as bad question"}
                   </button>
+                  {qmessage ? <p className="qmessage">{qmessage}</p> : null}
                   <button onClick={handleNextQuestion}>Next Question</button>
                 </div>
               </div>

@@ -43,3 +43,16 @@
 .buttons button:hover {
   background-color: var(--theme-highlights-light-color);
 }
+
+
+.qmessage {
+  color: var(--theme-highlights-border-color);
+  font-weight: 600;
+  position: absolute;
+}
+
+.noquizzes {
+  width: 100%;
+  text-align: center;
+  color: rgb(114, 114, 114);
+}

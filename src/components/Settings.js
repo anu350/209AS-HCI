@@ -16,11 +16,11 @@ export default function Settings(props) {
         </button>
       </div>
       <div style={styles.buttoncontainer}>
-        <h4>toolbar display high/low</h4>
-        <h4>
+        <h4>global settings go here...</h4>
+        {/* <h4>
           level of detail <span>on/off</span>
         </h4>
-        <h4>feedback on/off</h4>
+        <h4>feedback on/off</h4> */}
       </div>
     </div>
   );

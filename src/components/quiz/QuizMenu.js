@@ -47,7 +47,7 @@ export default function QuizMenu(props) {
               quizid={activeQuizId}
               // date={"adate"}
               numq={activeQuiz.length}
-              // type="mc"
+            // type="mc"
             />
           </div>
         </Tabs>

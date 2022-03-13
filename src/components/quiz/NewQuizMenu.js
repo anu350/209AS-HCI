@@ -122,7 +122,7 @@ export default function NewQuizMenu(props) {
 
   return (
     <div className="newQuizMenu-container">
-      {loading ? <p>Loading...</p> : null}
+      {loading ? <h3 className="loadingmsg">Loading...</h3> : null}
       <div className="newQuizMenu-subcontainer">
         <div>
           <h1>Multiple choice</h1>
@@ -131,21 +131,21 @@ export default function NewQuizMenu(props) {
 
         <div className="newQuizMenu-options-container">
           <span>
-            <p>number of questions</p>
+            <p>Number of Questions</p>
             <input
               className="MC-q-number"
               onChange={parameterChangeHandler}
-              placeholder="5"
+              placeholder="Default 5"
             />
           </span>
-          <span>
+          {/* <span>
             <p>seed</p>
             <input
               className="MC-q-seed"
               onChange={parameterChangeHandler}
               placeholder="seed (disabled)"
             />
-          </span>
+          </span> */}
         </div>
       </div>
       {/* <div className="newQuizMenu-subcontainer">

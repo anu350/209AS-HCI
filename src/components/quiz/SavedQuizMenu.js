@@ -140,23 +140,39 @@ export default function SavedQuizMenu(props) {
       .from("questions")
       .select()
       .match({ related_quiz: quiz_id });
-    if (error) console.log("error deleting quiz");
+    if (error) console.log("error loading quiz");
 
     // console.log("post response, data: ", data);
     props.loadQuiz(quiz_id, data);
   };
 
+  const handleQuizSelectionGood = async (quiz_id) => {
+    // console.log("in handle good only")
+    const { data, error } = await supabase
+      .from("questions")
+      .select()
+      .match({ related_quiz: quiz_id, badquestion: false });
+    if (error) console.log("error loading good only quiz");
+
+    console.log("goodonly, data:", data)
+
+    // console.log("post response, data: ", data);
+    props.loadQuiz(quiz_id, data);
+
+  }
+
+
   const deleteQuiz = async (quiz_id) => {
 
     // first delete questions then quiz
 
-    supabase.from("questions").delete().match({ related_quiz: quiz_id }) //.then((data, error) => { console.log(data.data) })
+    await supabase.from("questions").delete().match({ related_quiz: quiz_id }); //.then((data, error) => { console.log(data.data) })
 
     const { data, error } = await supabase
       .from("quizzes")
       .delete()
       .match({ id: quiz_id });
-    if (error) console.log("error deleting quiz");
+    if (error) console.log("error deleting quiz", error);
 
     // refetch
     fetchQuizzes();
@@ -177,7 +193,7 @@ export default function SavedQuizMenu(props) {
                       <button onClick={() => handleQuizSelection(myQ.id)}>
                         Load
                       </button>
-                      {myQ.badquestion_counter > 0 ? <button onClick={() => handleQuizSelection(myQ.id)}>
+                      {myQ.badquestion_counter > 0 ? <button onClick={() => handleQuizSelectionGood(myQ.id)}>
                         Load Good Only
                       </button> : null}
 
@@ -188,14 +204,14 @@ export default function SavedQuizMenu(props) {
                     {/* <p>Quiz type: {myQ.quiztype}</p> */}
                     <p>Number of Questions: {myQ.size}</p>
                     <p>Creation Date: {myQ.created_at.substring(0, 10)}</p>
-                    <p># bad questions: {myQ.badquestion_counter}</p>
+                    <p># Bad Questions: {myQ.badquestion_counter ? myQ.badquestion_counter : "0"}</p>
                     {/* <p>Difficulty: ?</p> */}
                   </div>
                 </div>
               ))}
             </div>
           ),
-          true: <p>No quizzes</p>,
+          true: <h3 className="noquizzes">No saved quizzes.</h3>,
         }[empty]
       }
     </div>
