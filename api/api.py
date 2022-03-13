@@ -16,7 +16,9 @@ import json
 #                model="valhalla/t5-small-qg-prepend", qg_format="prepend")
 # ----------------------------------------------------------------------------------
 
-from question_generator_mc import QuestionGenerator
+#from question_generator_mc import QuestionGenerator
+from question_generator import QuestionGenerator
+
 
 nlp = QuestionGenerator()
 
@@ -103,7 +105,8 @@ class NoteList(Resource):
             concat_note += thenote["blocks"][i]["text"]
 
         # output = nlp(concat_note)
-        output = nlp.generate(concat_note, answer_style="multiple_choice")
+        #output = nlp.generate(concat_note, answer_style="multiple_choice")
+        output = nlp.generate(concat_note)
         # print(output)
         return [NOTES[note_id], output, 201]
 
