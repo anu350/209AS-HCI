@@ -1,17 +1,10 @@
-<<<<<<< HEAD
 # Recent changes
 - Changes Option Index to match index of correct answer 
 - Button Hovers
 - Centering Quiz Container on Page & Some Styling Updates
-=======
->>>>>>> main
 
 # notesmart
 
-<<<<<<< HEAD
-# Missing:
-- More Animations/Transitions
-=======
 A notetaking app to encourage studying via automated quizzes
 
 
@@ -32,4 +25,3 @@ Prerequisites: npm and python 3.6+
 
 - `npm start`
 - `python api/api.py`
->>>>>>> main
