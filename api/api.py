@@ -16,8 +16,8 @@ import json
 #                model="valhalla/t5-small-qg-prepend", qg_format="prepend")
 # ----------------------------------------------------------------------------------
 
-from question_generator_mc import QuestionGenerator
-#from question_generator import QuestionGenerator
+#from question_generator_mc import QuestionGenerator
+from question_generator import QuestionGenerator
 
 
 nlp = QuestionGenerator()
@@ -111,36 +111,35 @@ class NoteList(Resource):
         # print(args["num_questions"])
 
         # During thie nlp.generate, return explanation
-        [qa_list, qg_hint, gen_questions] = nlp.generate(
-            concat_note, answer_style="multiple_choice", num_questions=int(args["num_questions"]))
         #[qa_list, qg_hint, gen_questions] = nlp.generate(
         #    concat_note, answer_style="multiple_choice", num_questions=int(args["num_questions"]))
+        qa_list = nlp.generate(concat_note, num_questions=int(args["num_questions"]))
 
         # Get contexts by tag
-        context = []
-        for text in qg_hint:
-            ar = text.split("<context>")
-            context.append(ar[1])
+        #context = []
+        #for text in qg_hint:
+        #    ar = text.split("<context>")
+        #    context.append(ar[1])
 
         # Create dictionary with questions and hints
-        question_hint_dict = {}
+        #question_hint_dict = {}
 
         #
 
-        for x in range(0, len(gen_questions)):
-            question_hint_dict[gen_questions[x]] = context[x]
+        #for x in range(0, len(gen_questions)):
+        #    question_hint_dict[gen_questions[x]] = context[x]
 
         # Create a reduced set of question/hints - DONT REALLY NEED THIS DICT
-        reduced_question_hint_dict = {}
+        #reduced_question_hint_dict = {}
 
         # Must check if its a substring since entries in dict may not exactly match
-        for x in range(0, len(qa_list)):
+        #for x in range(0, len(qa_list)):
             # Contains string of question being asked
-            qa_list_str = qa_list[x]["question"]
-            for question in question_hint_dict:
-                if (qa_list_str in question):
-                    qa_list[x]["explanation"] = question_hint_dict[question]
-                    reduced_question_hint_dict[qa_list_str] = question_hint_dict[question]
+        #    qa_list_str = qa_list[x]["question"]
+        #    for question in question_hint_dict:
+        #        if (qa_list_str in question):
+        #            qa_list[x]["explanation"] = question_hint_dict[question]
+        #            reduced_question_hint_dict[qa_list_str] = question_hint_dict[question]
 
         # Check if this works
         #ind = 1

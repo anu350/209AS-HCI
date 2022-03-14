@@ -61,7 +61,7 @@ class QuestionGenerator:
             qa = {
                 "question": question,
                 "answer": MC_choices_and_answers,
-                "context": context_sent
+                "explanation": context_sent
             }
             qa_list.append(qa)
 
