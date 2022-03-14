@@ -6,6 +6,7 @@ from gensim.models import KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
 from pipelines import pipeline
 from textblob import TextBlob
+import nltk
 
 #glove_file = '../data/embeddings/glove.6B.300d.txt'
 #tmp_file = '../data/embeddings/word2vec-glove.6B.300d.txt'
@@ -29,10 +30,9 @@ print('loaded glove embeddings')
 
 class QuestionGenerator:
     def __init__(self):
-        #self.nlp = pipeline("question-generation", model="valhalla/t5-small-qg-prepend", qg_format="prepend")
-        self.nlp = pipeline("question-generation", qg_format="prepend")
+        self.nlp = pipeline("question-generation")
 
-    def generate(self, text, num_questions=10):
+    def generate(self, text, num_questions=5):
         qa_list = []
         questions_and_answers = self.nlp(text)
         print('QUESTIONS AND SINGLE ANSWERS:', questions_and_answers)
@@ -40,7 +40,6 @@ class QuestionGenerator:
         for question_answer_pair in questions_and_answers:
             question = question_answer_pair['question']
             answer = question_answer_pair['answer']
-            answer = answer.replace('<pad> ', '')
 
             MC_choices_and_answers = self._get_MC_answers_from_distractors(answer, 3)
 
@@ -56,8 +55,25 @@ class QuestionGenerator:
         return qa_list
 
     def _get_MC_answers_from_distractors(self, correct_answer, count):
+        # preprocessing to improve distractor quality
         correct_answer = str.lower(correct_answer)
-        correct_answer_words = correct_answer.split(' ')
+        #correct_answer_words = correct_answer.split(' ')
+        correct_answer_tokens = nltk.word_tokenize(correct_answer)
+        tagged_correct_answer_tokens = nltk.pos_tag(correct_answer_tokens)
+        print('TAGGED CORRECT ANSWER TOKENS:', tagged_correct_answer_tokens)
+        correct_answer_words = [token[0] for token in tagged_correct_answer_tokens if token[1][0] == 'N']
+
+        useless_words = [
+            'the',
+            'it',
+            'is',
+            'was',
+            'a',
+            'an',
+            'that',
+            'on',
+            'in'
+        ]
         
         #if len(correct_answer_words) > 1:
         #    correct_answer = correct_answer.split(' ')[0]

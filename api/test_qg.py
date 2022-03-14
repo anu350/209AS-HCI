@@ -18,6 +18,6 @@ Alas, the Italian Renaissance could not last forever, and beginning in 1494 with
 
 qg = QuestionGenerator()
 #qa_list = qg.generate(text, answer_style='multiple_choice', num_questions=3)
-qa_list = qg.generate(text, num_questions=10)
+qa_list = qg.generate(text, num_questions=5)
 
 print(qa_list)

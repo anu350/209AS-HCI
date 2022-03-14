@@ -6,6 +6,7 @@ import random
 import re
 import torch
 import gensim
+import nltk
 from transformers import (
     AutoTokenizer,
     AutoModelForSeq2SeqLM,
@@ -281,7 +282,11 @@ class QuestionGenerator:
 
     def _get_MC_answers_from_distractors(self, correct_answer, count):
         correct_answer = str.lower(correct_answer.text)
-        correct_answer_words = correct_answer.split(' ')
+        correct_answer_tokens = nltk.word_tokenize(correct_answer)
+        tagged_correct_answer_tokens = nltk.pos_tag(correct_answer_tokens)
+        correct_answer_words = [token[0] for token in tagged_correct_answer_tokens if token[1][0] == 'N']
+        if len(correct_answer_words) == 0:
+            correct_answer_words = correct_answer.split(' ')
         
         #if len(correct_answer_words) > 1:
         #    correct_answer = correct_answer.split(' ')[0]
