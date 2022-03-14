@@ -61,19 +61,17 @@ NOTES = {
 
 SAMPLE_Qs = [
     {"question": "Why did the chicken cross the road?",
-     "important_stuff":
+     "explanation": "HERE IS EXPLANATION",
+     "answers":
          [{
-             'text': "sample sentence that should be highlighted.",
-             'offset': 3,
-             'length': 14,
+             'answer': "answer 1",
+             'correct': True,
          },
              {
-             'text': "another sentence that is important.",
-             'offset': 21,
-             'length': 16,
+             'answer': "answer 2",
+             'correct': False,
          }]
      },
-
 ]
 
 parser = reqparse.RequestParser()
@@ -87,6 +85,7 @@ class NoteList(Resource):
         parser.add_argument("title")
         parser.add_argument("content")
         parser.add_argument("raw_json")
+        parser.add_argument("num_questions")
         # parser.add_argument("tags")
         # parser.add_argument("questions")
         args = parser.parse_args()
@@ -99,16 +98,59 @@ class NoteList(Resource):
             'tags': [],
             'questions': []
         }
+        # print('--------------------------\n\n\n')
+        # print('args[raw_json]')
+        # print(args['raw_json'])
+        # print(NOTES[note_id]['raw_json'])
         thenote = json.loads(args['raw_json'])
         concat_note = ""
         for i in range(len(thenote["blocks"])):
             concat_note += thenote["blocks"][i]["text"]
 
         # output = nlp(concat_note)
-        #output = nlp.generate(concat_note, answer_style="multiple_choice")
-        output = nlp.generate(concat_note)
-        # print(output)
-        return [NOTES[note_id], output, 201]
+        # print(args["num_questions"])
+
+        # During thie nlp.generate, return explanation
+        [qa_list, qg_hint, gen_questions] = nlp.generate(
+            concat_note, answer_style="multiple_choice", num_questions=int(args["num_questions"]))
+
+        # Get contexts by tag
+        context = []
+        for text in qg_hint:
+            ar = text.split("<context>")
+            context.append(ar[1])
+
+        # Create dictionary with questions and hints
+        question_hint_dict = {}
+
+        #
+
+        for x in range(0, len(gen_questions)):
+            question_hint_dict[gen_questions[x]] = context[x]
+
+        # Create a reduced set of question/hints - DONT REALLY NEED THIS DICT
+        reduced_question_hint_dict = {}
+
+        # Must check if its a substring since entries in dict may not exactly match
+        for x in range(0, len(qa_list)):
+            # Contains string of question being asked
+            qa_list_str = qa_list[x]["question"]
+            for question in question_hint_dict:
+                if (qa_list_str in question):
+                    qa_list[x]["explanation"] = question_hint_dict[question]
+                    reduced_question_hint_dict[qa_list_str] = question_hint_dict[question]
+
+        # Check if this works
+        #ind = 1
+        # for question in reduced_question_hint_dict:
+        #    print("Question", ind, ")", question)
+        #    print("Context: ", reduced_question_hint_dict[question])
+        #    print("\n")
+        #    ind = ind +1
+        print("debug---------\n")
+        print(qa_list)
+
+        return [NOTES[note_id], qa_list, 201]
 
 
 class Note(Resource):

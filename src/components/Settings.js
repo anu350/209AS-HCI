@@ -16,11 +16,11 @@ export default function Settings(props) {
         </button>
       </div>
       <div style={styles.buttoncontainer}>
-        <h3>toolbar display high/low</h3>
-        <h3>
+        <h4>global settings go here...</h4>
+        {/* <h4>
           level of detail <span>on/off</span>
-        </h3>
-        <h3>feedback on/off</h3>
+        </h4>
+        <h4>feedback on/off</h4> */}
       </div>
     </div>
   );
@@ -38,7 +38,7 @@ const styles = {
     fontFamily: "Helvetica",
     fontSize: "50px",
     fontWeight: "bold",
-    color: "red",
+    color: "var(--theme-highlights-border-color)",
     display: "flex",
     flexDirection: "column",
     textAlign: "left",

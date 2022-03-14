@@ -101,7 +101,7 @@ class QuestionGenerator:
             print("Skipping evaluation step.\n")
             qa_list = self._get_all_qa_pairs(generated_questions, qg_answers)
 
-        return qa_list
+        return qa_list, qg_inputs, generated_questions
 
     def generate_qg_inputs(self, text: str, answer_style: str) -> Tuple[List[str], List[str]]:
         """Given a text, returns a list of model inputs and a list of corresponding answers.

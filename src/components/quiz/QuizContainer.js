@@ -3,12 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import Question from "./Question";
-import "../../../node_modules/font-awesome/css/font-awesome.min.css";
+// import "../../../node_modules/font-awesome/css/font-awesome.min.css";
 import "./QuizContainer.css";
 //import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 //import Oval from 'react-loader-spinner';
 
-// -------------------------------------------------------------------------------------------- Actual format to handle
 const realQuestions = [
   {
     question: "what?",
@@ -19,6 +18,10 @@ const realQuestions = [
       },
       {
         answer: "something else",
+        correct: false,
+      },
+      {
+        answer: "something besides that",
         correct: false,
       },
       {
@@ -42,36 +45,11 @@ const realQuestions = [
         answer: "nobody",
         correct: false,
       },
+      {
+        answer: "something besides that",
+        correct: false,
+      },
     ],
-  },
-];
-
-const dummyMCquestions = [
-  {
-    question: "How many days makes a week ?",
-    optionA: "10 days",
-    optionB: "14 days",
-    optionC: "5 days",
-    optionD: "7 days",
-    correctOption: "optionD",
-  },
-
-  {
-    question: "How many players are allowed on a soccer pitch ?",
-    optionA: "10 players",
-    optionB: "11 players",
-    optionC: "9 players",
-    optionD: "12 players",
-    correctOption: "optionB",
-  },
-
-  {
-    question: "Who was the first President of USA ?",
-    optionA: "Donald Trump",
-    optionB: "Barack Obama",
-    optionC: "Abraham Lincoln",
-    optionD: "George Washington",
-    correctOption: "optionD",
   },
 ];
 
@@ -91,7 +69,9 @@ export default function QuizContainer(props) {
   let indexNumber = 0;
 
   useEffect(() => {
-    generateQuestions(props.noteId);
+    setQuestions(realQuestions);
+    setQuizLength(realQuestions.length);
+    // generateQuestions(props.noteId);
     console.log("Quiz start!");
   }, []);
 

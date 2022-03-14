@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <title>Canvas Home</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <title></title>
+
+
+  <style>
+
+    *{
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    #canvas{
+      border: 2px solid white;
+      margin-left: 210px;
+    }
+
+    /* Style the side navigation */
+    .toolbar {
+    height: 100%;
+    width: 200px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #8bd4f8;
+    overflow-x: hidden;
+    }
+
+
+    /* Side navigation links */
+    .toolbar a {
+    color: black;
+    padding: 15px;
+    text-decoration: none;
+    display: block;
+    }
+
+    /* Change color on hover */
+    .toolbar a:hover {
+    background-color: #2FDE9D;
+    color: black;
+    }
+
+    .clear {
+    font-family: "Roboto", sans-serif;
+    text-transform: uppercase;
+    outline: 0;
+    background: #2FDE9D;
+    width: 75%;
+    border: 0;
+    padding: 10px;
+    border-radius: 30px;
+    align-items: center;
+    }
+
+    .clear:hover {
+    background-color: #ddd;
+    color: black;
+    }
+
+  </style>
+
+  <body>
+
+     <div class="toolbar" id = "toolbar">
+      <h1>Draw.</h1>
+      <label for="stroke"></label>
+      <input id="stroke" name="stroke" type="color">
+      <input id="lineWidth" name="lineWidth" type ="number" value="5">
+      <button id="clear" class="clear" type="button" onclick ="clearCanvas()">   Clear</button>
+    </div>
+
+    </body>
+    
+    <canvas id = "canvas"></canvas>
+    <script src = "canvas.js"> </script> 
+    
+  </body>
+
+</html>

@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./TopBar.module.css";
 
-function random_rgba_pair(opac = 0.3) {
+function random_rgba_pair() {
   // opacities are hardcoded. should fix.
 
   var o = Math.round,
@@ -15,10 +15,10 @@ function random_rgba_pair(opac = 0.3) {
     g2 = 255 - g1,
     b2 = 255 - b1;
   let color_pair = {
-    color1: "rgba(" + r1 + "," + g1 + "," + b1 + ",1)",
-    color2_border: "rgba(" + r2 + "," + g2 + "," + b2 + "," + opac + ")",
-    color2_bg: "rgba(" + r2 + "," + g2 + "," + b2 + ",0.9)",
-    color2_shadow: "rgba(" + r2 + "," + g2 + "," + b2 + ",0.801)",
+    color_border: "rgba(" + r2 + "," + g2 + "," + b2 + ",0.9)",
+    color_shadow: "rgba(" + r2 + "," + g2 + "," + b2 + ",0.8)",
+    color_light: "rgba(" + r2 + "," + g2 + "," + b2 + ",0.3)",
+    color_lighter: "rgba(" + r2 + "," + g2 + "," + b2 + ",0.1)",
   };
 
   return color_pair;
@@ -33,32 +33,41 @@ export default function TopBar(props) {
   const onclickTheme = () => {
     // TODO: fix color error when adding notes
     const color_pair = random_rgba_pair();
+    let root = document.documentElement;
+    root.style.setProperty(
+      "--theme-highlights-border-color",
+      color_pair.color_border
+    );
+    root.style.setProperty(
+      "--theme-highlights-boxshadow-color",
+      color_pair.color_shadow
+    );
+    root.style.setProperty(
+      "--theme-highlights-light-color",
+      color_pair.color_light
+    );
+    root.style.setProperty(
+      "--theme-highlights-lighter-color",
+      color_pair.color_lighter
+    );
+
     // console.log("random colors: ", color_pair.color1, " ", color_pair.color2);
 
-    document.getElementsByClassName("leftbar-container")[0].style.borderColor =
-      color_pair.color2_border;
-    document.getElementsByClassName(
-      "searchbar-container"
-    )[0].style.backgroundColor = color_pair.color2_border;
+    // document.getElementsByClassName("leftbar-container")[0].style.borderColor =
+    //   color_pair.color2_border;
+    // document.getElementsByClassName(
+    //   "searchbar-container"
+    // )[0].style.backgroundColor = color_pair.color2_border;
 
-    document.getElementsByClassName(
-      "TopBar_themeDot__G4gjh"
-    )[0].style.backgroundColor = color_pair.color2_bg;
-    document.getElementsByClassName(
-      "TopBar_themeDot__G4gjh"
-    )[0].style.backgroundColor = color_pair.color2_bg;
-    document.getElementsByClassName(
-      "TopBar_themeDot__G4gjh"
-    )[0].style.boxShadow = "-2.5px -2.5px 10px 10px " + color_pair.color2_bg;
-
-    // Following code works but fails to update when new notes get added.
-
-    // Array.from(
-    //   document.getElementsByClassName("notebriefscontainer")[0].children
-    // ).map((brief) => {
-    //   brief.style.backgroundColor = color_pair.color1;
-    //   return 0;
-    // });
+    // document.getElementsByClassName(
+    //   "TopBar_themeDot__G4gjh"
+    // )[0].style.backgroundColor = color_pair.color2_bg;
+    // document.getElementsByClassName(
+    //   "TopBar_themeDot__G4gjh"
+    // )[0].style.backgroundColor = color_pair.color2_bg;
+    // document.getElementsByClassName(
+    //   "TopBar_themeDot__G4gjh"
+    // )[0].style.boxShadow = "-2.5px -2.5px 10px 10px " + color_pair.color2_bg;
   };
 
   const onclickSettings = () => {

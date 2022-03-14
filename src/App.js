@@ -13,9 +13,7 @@ import React, { useState } from "react";
 import NoteList from "./components/noteEditor/NoteList";
 import TopBar from "./components/TopBar";
 import Settings from "./components/Settings";
-// import QuestionContainer from "./components/unused/QuestionContainer";
-// import QEditor from "./components/unused/QEditor";
-import QuizContainer from "./components/quiz/QuizContainer";
+import QuizMenu from "./components/quiz/QuizMenu";
 
 function App() {
   const [showSettings, setShowSettings] = useState(false);
@@ -68,28 +66,10 @@ function App() {
           togglequestionmode={togglequestionmode}
         />
       </div>
-      {/* --------------------Uncomment this to create questions */}
-      {/* {questionMode ? (
-        <div style={styles.qmode}>
-          <div style={styles.qeditor}>
-            <QEditor
-              style={styles.qeditor}
-              note={currentFullNote}
-              key={"note" + currentNoteId}
-            />
-          </div>
-          <div style={styles.qcontainer}>
-            <QuestionContainer
-              noteId={currentNoteId}
-              fullnote={currentFullNote}
-            />
-          </div>
-        </div>
-      ) : ( */}
       {questionMode ? (
         <div style={styles.qmode}>
           <div style={styles.qcontainer}>
-            <QuizContainer noteId={currentNoteId} fullnote={currentFullNote} />
+            <QuizMenu noteId={currentNoteId} fullnote={currentFullNote} />
           </div>
         </div>
       ) : (

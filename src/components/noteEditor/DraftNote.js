@@ -1,12 +1,10 @@
-// Note using Draft.js instead of quill
-// source: https://reactrocket.com/post/draft-js-persisting-content/
-//
-// PENDING: - FIX EDITOR WIDTH SO THAT IT DOESNT CHANGE DEPENDING ON CONTENT.
+// Missing: on load - setstate with props for last edit time and wordcount
 
 import React, { Component } from "react";
-import "draft-js/dist/Draft.css";
+// import "draft-js/dist/Draft.css";
 import debounce from "lodash/debounce";
 import { supabase } from "../../lib/supabaseClient";
+import "./DraftNote.css";
 
 import {
   Editor,
@@ -18,6 +16,34 @@ import {
   // Modifier,
 } from "draft-js";
 
+// try this function to get "Last saved x seconds ago..."
+function timeSince(date) {
+  var seconds = Math.floor((new Date() - date) / 1000);
+
+  var interval = seconds / 31536000;
+
+  if (interval > 1) {
+    return Math.floor(interval) + " years";
+  }
+  interval = seconds / 2592000;
+  if (interval > 1) {
+    return Math.floor(interval) + " months";
+  }
+  interval = seconds / 86400;
+  if (interval > 1) {
+    return Math.floor(interval) + " days";
+  }
+  interval = seconds / 3600;
+  if (interval > 1) {
+    return Math.floor(interval) + " hours";
+  }
+  interval = seconds / 60;
+  if (interval > 1) {
+    return Math.floor(interval) + " minutes";
+  }
+  return Math.floor(seconds) + " seconds";
+}
+
 class MyEditor extends Component {
   constructor(props) {
     /**
@@ -25,14 +51,18 @@ class MyEditor extends Component {
      */
     super(props);
     const note = this.props.note;
+    const wordcount = this.props.wordcount;
     const editorState = this.createContent(note);
-    this.state = { editorState: editorState };
-    // this.domEditor = React.createRef();
+    // this.wordcount = props.wordcount;
+    this.state = {
+      editorState: editorState,
+      wordcount: wordcount,
+      lastsave: "",
+    };
     this.handleKeyCommand = this.handleKeyCommand.bind(this); // needed for handling bold, etc
   }
 
   saveTitle = debounce(async (title) => {
-    // console.log("savingTitle: ", title);
     const edit_time = new Date().toISOString();
     await supabase
       .from("notes")
@@ -44,7 +74,7 @@ class MyEditor extends Component {
     this.props.updatecallback();
   }, 1000);
 
-  saveContent = debounce(async (content) => {
+  saveContent = debounce(async (content, wordcount) => {
     const edit_time = new Date().toISOString();
     await supabase
       .from("notes")
@@ -52,10 +82,12 @@ class MyEditor extends Component {
         raw_json: JSON.stringify(convertToRaw(content)),
         last_edit_time: edit_time,
         note: convertToRaw(content).blocks[0].text.substring(0, 50),
+        wordcount: wordcount,
       })
       .match({ id: this.props.note.id });
     console.log("saved note contents");
     this.props.updatecallback();
+    this.setState({ lastsave: edit_time });
   }, 1000);
 
   onTitleChange = (title) => {
@@ -63,21 +95,27 @@ class MyEditor extends Component {
     this.saveTitle(title.target.value);
   };
 
+  getWordCount(content) {
+    const plainText = content.getPlainText("");
+    const regex = /(?:\r\n|\r|\n)/g; // new line, carriage return, line feed
+    const cleanString = plainText.replace(regex, " ").trim(); // replace above characters w/ space
+    const wordArray = cleanString.match(/\S+/g); // matches words according to whitespace
+    return wordArray ? wordArray.length : 0;
+  }
+
   createContent(note) {
     if (!note) {
       const defaultContent = ContentState.createFromText(
-        "first you must add a note on the left side panel"
+        "Select a note or create a new one."
       );
       return EditorState.createWithContent(defaultContent);
     }
     if (!note.id) {
       const defaultContent = ContentState.createFromText(
-        "first you must select a note on the left side panel"
+        "Select a note or create a new one."
       );
       return EditorState.createWithContent(defaultContent);
     }
-    // console.log("right before convertfromraw in create content");
-    // console.log("note", note.raw_json);
     if (note.raw_json) {
       this.title = note.title;
       const contentState = convertFromRaw(JSON.parse(note.raw_json));
@@ -85,14 +123,17 @@ class MyEditor extends Component {
       return EditorState.moveSelectionToEnd(editorState);
     }
     this.title = note.title;
-    const defaultContent = ContentState.createFromText("note is empty");
+    const defaultContent = ContentState.createFromText(
+      "A soon to be masterpiece..."
+    );
     // change placeholder to "Start typing..."
     return EditorState.createWithContent(defaultContent);
   }
 
   onChange = (editorState) => {
     const contentState = editorState.getCurrentContent();
-    this.saveContent(contentState);
+    this.setState({ wordcount: this.getWordCount(contentState) });
+    this.saveContent(contentState, this.state.wordcount);
     this.setState({ editorState });
   };
 
@@ -105,16 +146,12 @@ class MyEditor extends Component {
     }
   }
 
-  // componentDidMount() {}
-
   handleKeyCommand(command, editorState) {
     const newState = RichUtils.handleKeyCommand(editorState, command);
-
     if (newState) {
       this.onChange(newState);
       return "handled";
     }
-
     return "not-handled";
   }
 
@@ -151,46 +188,39 @@ class MyEditor extends Component {
 
   render() {
     return (
-      <div style={styles2.noteEditor}>
-        <div>
-          <form>
-            <input
-              style={styles2.notetitle}
-              type="text"
-              onChange={this.onTitleChange}
-              placeholder={this.title}
-            />
-          </form>
-        </div>
-        <div>
-          <div style={styles2.buttonBar}>
-            <button
-              style={styles2.button}
-              onClick={this._onBoldClick.bind(this)}
-              onMouseEnter={this.buttonHover}
-              onMouseLeave={this.stopButtonHover}
-            >
-              Bold
-            </button>
-            <button
-              style={styles2.button}
-              onClick={this._onItalicClick.bind(this)}
-              onMouseEnter={this.buttonHover}
-              onMouseLeave={this.stopButtonHover}
-            >
-              Italic
-            </button>
-            <button
-              style={styles2.button}
-              onClick={this._onUnderlineClick.bind(this)}
-              onMouseEnter={this.buttonHover}
-              onMouseLeave={this.stopButtonHover}
-            >
-              Underline
-            </button>
-            {/* <button onClick={this._onToggleCode.bind(this)}>Code block</button> */}
+      <div className="editor-container">
+        <div className="editor-header">
+          <input
+            className="editor-title"
+            type="text"
+            onChange={this.onTitleChange}
+            placeholder={this.title}
+          />
+          <div className="note-info">
+            <p>Word Count: {this.state.wordcount}</p>
+            {/* <p>Last Edited:{timeSince(this.state.lastsave)}</p> */}
+            <div className="button-bar">
+              <button className="bold" onClick={this._onBoldClick.bind(this)}>
+                B
+              </button>
+              <button
+                className="italic"
+                onClick={this._onItalicClick.bind(this)}
+              >
+                <i>I</i>
+              </button>
+              <button
+                className="underline"
+                onClick={this._onUnderlineClick.bind(this)}
+              >
+                <u>U</u>
+              </button>
+              {/* <button onClick={this._onToggleCode.bind(this)}>Code block</button> */}
+            </div>
           </div>
-          <div style={styles2.actualEditor}>
+        </div>
+        <div className="draft-editor-area">
+          <div className="actual-editor">
             <Editor
               editorState={this.state.editorState}
               handleKeyCommand={this.handleKeyCommand}
@@ -203,67 +233,5 @@ class MyEditor extends Component {
     );
   }
 }
-
-const styles2 = {
-  noteEditor: {
-    zIndex: 900,
-    fontFamily: "'Helvetica', sans-serif",
-    padding: 20,
-    // borderStyle: "solid",
-    // borderWidth: "5px",
-    // borderColor: "red",
-    flexGrow: 1,
-  },
-  actualEditor: {
-    // border: "3px solid #eee",
-    border: "4px solid #fafafa",
-    cursor: "text",
-    height: "65vh",
-    padding: 10,
-    width: "90%",
-    // maxWidth: "90%",
-    // display: "block",
-    marginLeft: "auto",
-    marginRight: "auto",
-    overflowY: "auto",
-  },
-  buttonBar: {
-    // paddingLeft: 10,
-    height: "45px",
-    width: "90%",
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
-    marginLeft: "auto",
-    marginRight: "auto",
-  },
-  editorContainer: {
-    display: "flex",
-    flexDirection: "column",
-  },
-  button: {
-    height: "30px",
-    width: "100px",
-    marginRight: "10px",
-    fontSize: "15px",
-    padding: "0px",
-    position: "relative",
-    borderRadius: "8px",
-    backgroundColor: "", 
-    color: "black", 
-    border: "1px solid #abc6fd",
-    cursor: "pointer", 
-  },
-  notetitle: {
-    border: "none",
-    display: "inline",
-    fontFamily: "inherit",
-    fontSize: "30px",
-    fontWeight: "bold",
-    padding: "none",
-    width: "100%",
-    marginBottom: "15px",
-  },
-};
 
 export default MyEditor;

@@ -1,3 +1,10 @@
+:root {
+  --theme-highlights-border-color: rgb(255, 0, 0, 0.9);
+  --theme-highlights-boxshadow-color: rgba(255, 0, 0, 0.8);
+  --theme-highlights-light-color: rgba(255, 0, 0, 0.3);
+  --theme-highlights-lighter-color: rgba(255, 0, 0, 0.1);
+}
+
 .bigbox {
   display: flex;
   flex-direction: row;
@@ -83,11 +90,11 @@
   margin-top: 4px;
   height: 14px;
   width: 14px;
-  background-color: rgb(255, 0, 0, 0.9);
+  background-color: var(--theme-highlights-border-color);
   border-radius: 50%;
   display: inline-block;
   position: relative;
-  box-shadow: -2.5px -2.5px 10px 10px rgba(255, 0, 0, 0.801);
+  box-shadow: -2.5px -2.5px 10px 10px var(--theme-highlights-boxshadow-color);
 }
 
 .Q {
