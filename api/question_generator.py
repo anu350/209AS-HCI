@@ -1,12 +1,12 @@
 import os
 import random
+import nltk
+import re
 import gensim
 from gensim.test.utils import datapath, get_tmpfile
 from gensim.models import KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
 from pipelines import pipeline
-from textblob import TextBlob
-import nltk
 
 #glove_file = '../data/embeddings/glove.6B.300d.txt'
 #tmp_file = '../data/embeddings/word2vec-glove.6B.300d.txt'
@@ -28,24 +28,40 @@ glove2word2vec(glove_file, tmp_file)
 model = KeyedVectors.load_word2vec_format(tmp_file)
 print('loaded glove embeddings')
 
+
 class QuestionGenerator:
     def __init__(self):
         self.nlp = pipeline("question-generation")
+        self.context_re = re.compile(r'[^.]*<hl>.+<hl>[^.]*\.')
 
     def generate(self, text, num_questions=5):
         qa_list = []
-        questions_and_answers = self.nlp(text)
-        print('QUESTIONS AND SINGLE ANSWERS:', questions_and_answers)
+        questions_and_answers, contexts = self.nlp(text)
+        #print('CONTEXTS:', contexts)
+        #print('QUESTIONS AND SINGLE ANSWERS:', questions_and_answers)
 
-        for question_answer_pair in questions_and_answers:
+        for (question_answer_pair, context) in zip(questions_and_answers, contexts):
             question = question_answer_pair['question']
             answer = question_answer_pair['answer']
 
+            # generate distractor choices
             MC_choices_and_answers = self._get_MC_answers_from_distractors(answer, 3)
+
+            # extract the sentence the answer comes from
+            context = context.replace('generate question: ', '')
+            context = context.replace(' </s>', '')
+            matches = self.context_re.search(context, re.IGNORECASE)
+            if matches is not None:
+                context_sent = matches.group(0)
+                context_sent = context_sent.replace(' <hl> ', '')
+                context_sent = context_sent.strip()
+            else:
+                context_sent = "Could not find context. Sorry!"
 
             qa = {
                 "question": question,
-                "answer": MC_choices_and_answers
+                "answer": MC_choices_and_answers,
+                "context": context_sent
             }
             qa_list.append(qa)
 
@@ -57,26 +73,25 @@ class QuestionGenerator:
     def _get_MC_answers_from_distractors(self, correct_answer, count):
         # preprocessing to improve distractor quality
         correct_answer = str.lower(correct_answer)
-        #correct_answer_words = correct_answer.split(' ')
         correct_answer_tokens = nltk.word_tokenize(correct_answer)
         tagged_correct_answer_tokens = nltk.pos_tag(correct_answer_tokens)
-        print('TAGGED CORRECT ANSWER TOKENS:', tagged_correct_answer_tokens)
+        #print('TAGGED CORRECT ANSWER TOKENS:', tagged_correct_answer_tokens)
         correct_answer_words = [token[0] for token in tagged_correct_answer_tokens if token[1][0] == 'N']
+        if len(correct_answer_words) == 0:
+            correct_answer_words = correct_answer.split(' ')
 
-        useless_words = [
-            'the',
-            'it',
-            'is',
-            'was',
-            'a',
-            'an',
-            'that',
-            'on',
-            'in'
-        ]
+        #useless_words = [
+        #    'the',
+        #    'it',
+        #    'is',
+        #    'was',
+        #    'a',
+        #    'an',
+        #    'that',
+        #    'on',
+        #    'in'
+        #]
         
-        #if len(correct_answer_words) > 1:
-        #    correct_answer = correct_answer.split(' ')[0]
         print('CORRECT ANSWER WORDS:', correct_answer_words)
 
         # Add the correct answer

@@ -62,7 +62,8 @@ class QGPipeline:
         qg_inputs = [example['source_text'] for example in qg_examples]
         questions = self._generate_questions(qg_inputs)
         output = [{'answer': example['answer'], 'question': que} for example, que in zip(qg_examples, questions)]
-        return output
+        return output, qg_inputs
+        #return output
     
     def _generate_questions(self, inputs):
         inputs = self._tokenize(inputs, padding=True, truncation=True)
@@ -139,10 +140,6 @@ class QGPipeline:
                 
                 answer_text = answer_text.strip()
                 
-                #if answer_text in sent:
-                #    ans_start_idx = sent.index(answer_text)
-                #else:
-                #    continue
                 ans_start_idx = sent.index(answer_text)
                 
                 sent = f"{sent[:ans_start_idx]} <hl> {answer_text} <hl> {sent[ans_start_idx + len(answer_text): ]}"
