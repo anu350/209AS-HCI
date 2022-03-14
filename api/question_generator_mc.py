@@ -1,15 +1,35 @@
+import os
 import en_core_web_sm
 import json
 import numpy as np
 import random
 import re
 import torch
+import gensim
+import nltk
 from transformers import (
     AutoTokenizer,
     AutoModelForSeq2SeqLM,
     AutoModelForSequenceClassification,
 )
 from typing import Any, List, Mapping, Tuple
+from gensim.test.utils import datapath, get_tmpfile
+from gensim.models import KeyedVectors
+from gensim.scripts.glove2word2vec import glove2word2vec
+
+#glove_file = '../data/embeddings/glove.6B.300d.txt'
+#tmp_file = '../data/embeddings/word2vec-glove.6B.300d.txt'
+
+glove_file = '../data/embeddings/glove.6B.50d.txt'
+tmp_file = '../data/embeddings/word2vec-glove.6B.50d.txt'
+
+if not os.path.isfile(glove_file):
+    print("Glove embeddings not found. Please download and place them in the following path: " + glove_file)
+    exit(1)
+
+glove2word2vec(glove_file, tmp_file)
+model = KeyedVectors.load_word2vec_format(tmp_file)
+print('loaded glove thing')
 
 
 class QuestionGenerator:
@@ -208,13 +228,14 @@ class QuestionGenerator:
 
                 for entity in entities:
                     qg_input = f"{self.ANSWER_TOKEN} {entity} {self.CONTEXT_TOKEN} {sentence}"
-                    answers = self._get_MC_answers(entity, docs)
+                    #answers = self._get_MC_answers(entity, docs)
+                    answers = self._get_MC_answers_from_distractors(entity, 3)
                     inputs_from_text.append(qg_input)
                     answers_from_text.append(answers)
 
         return inputs_from_text, answers_from_text
 
-    def _get_MC_answers(self, correct_answer: Any, docs: Any) -> List[Mapping[str, Any]]:
+    def _get_MC_answers_from_entities(self, correct_answer: Any, docs: Any) -> List[Mapping[str, Any]]:
         """Finds a set of alternative answers for a multiple-choice question. Will attempt to find
         alternatives of the same entity type as correct_answer if possible.
         """
@@ -256,6 +277,39 @@ class QuestionGenerator:
         for choice in choices:
             final_choices.append({"answer": choice["text"], "correct": False})
 
+        random.shuffle(final_choices)
+        return final_choices
+
+    def _get_MC_answers_from_distractors(self, correct_answer, count):
+        correct_answer = str.lower(correct_answer.text)
+        correct_answer_tokens = nltk.word_tokenize(correct_answer)
+        tagged_correct_answer_tokens = nltk.pos_tag(correct_answer_tokens)
+        correct_answer_words = [token[0] for token in tagged_correct_answer_tokens if token[1][0] == 'N']
+        if len(correct_answer_words) == 0:
+            correct_answer_words = correct_answer.split(' ')
+        
+        #if len(correct_answer_words) > 1:
+        #    correct_answer = correct_answer.split(' ')[0]
+        print('CORRECT ANSWER WORDS:', correct_answer_words)
+
+        # Add the correct answer
+        final_choices = []
+        final_choices.append({"answer": correct_answer, "correct": True})
+    
+        ##Extracting closest words for the answer.
+        try:
+            closestWords = model.most_similar(positive=correct_answer_words, topn=count)
+            print('CLOSEST WORDS:', closestWords)
+        except:
+            #In case the word is not in the vocabulary, or other problem not loading embeddings
+            return []
+
+        #Return count many distractors
+        distractors = list(map(lambda x: x[0], closestWords))[0:count]
+
+        for distractor in distractors:
+            final_choices.append({"answer": distractor, "correct": False})
+        
         random.shuffle(final_choices)
         return final_choices
 

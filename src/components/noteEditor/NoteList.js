@@ -32,6 +32,17 @@ export default function NoteList(props) {
   // This is called everytime currentNote changes -- via a setCurrentNote() call
   useEffect(() => {}, [currentNote]);
 
+  const buttonHover = (event) => {
+    event.target.style.backgroundColor = "#abc6fd";
+    event.target.style.transitionDuration = "0.2s";
+    // event.target.style.backgroundColor = "#ebebeb";
+  };
+
+  const stopButtonHover = (event) => {
+    event.target.style.backgroundColor = "";
+    // event.target.style.backgroundColor = "";
+  };
+
   const briefClick = (clickedId) => {
     let thenote = notes.find((n) => n.id === clickedId);
     setCurrentNote(thenote);
@@ -148,5 +159,17 @@ const style = {
     height: "100%",
     cursor: "pointer",
     overflowY: "auto",
+  },
+  newNote: {
+    height: "40px",
+    width: "40px",
+    fontSize: "26px",
+    padding: "0px",
+    marginRight: "2.5px",
+    borderRadius: "8px",
+    backgroundColor: "", 
+    color: "black", 
+    border: "1px solid #abc6fd",
+    cursor: "pointer", 
   },
 };

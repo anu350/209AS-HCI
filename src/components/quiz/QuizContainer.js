@@ -5,6 +5,8 @@ import { supabase } from "../../lib/supabaseClient";
 import Question from "./Question";
 // import "../../../node_modules/font-awesome/css/font-awesome.min.css";
 import "./QuizContainer.css";
+//import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+//import Oval from 'react-loader-spinner';
 
 const realQuestions = [
   {
@@ -151,13 +153,13 @@ export default function QuizContainer(props) {
     document.getElementById("player-score").innerHTML = playerScore;
     document.getElementById("display-question").innerHTML =
       currentQuestion.question;
-    document.getElementById("option-one-label").innerHTML =
+    document.getElementById("option-zero-label").innerHTML =
       currentQuestion.answers[0].answer;
-    document.getElementById("option-two-label").innerHTML =
+    document.getElementById("option-one-label").innerHTML =
       currentQuestion.answers[1].answer;
-    document.getElementById("option-three-label").innerHTML =
+    document.getElementById("option-two-label").innerHTML =
       currentQuestion.answers[2].answer;
-    document.getElementById("option-four-label").innerHTML =
+    document.getElementById("option-three-label").innerHTML =
       currentQuestion.answers[3].answer;
   };
 
@@ -167,8 +169,8 @@ export default function QuizContainer(props) {
     const idx = shuffledQuestions[indexNumber].answers.findIndex(
       (x) => x.correct === true
     );
-    const answer_value = "option" + idx;
-    // console.log("my answer: ", x_answer);
+    const answer_value = "option" + idx;  //option0,1,2,3
+    console.log("my answer: ", answer_value); //x_answer
     const options = document.getElementsByName("option"); //gets all elements in dom with name of 'option' (in this the radio inputs) <-------- TOO HARDCODED!
     let correctOption = null;
 
@@ -252,13 +254,13 @@ export default function QuizContainer(props) {
 
     // condition check for player remark and remark color <---------------------------------------------- Hardcoded. make dynamic or remove
     if (playerScore <= 3) {
-      remark = "Bad Grades, Keep Practicing.";
+      remark = "Improvement Needed, Keep Practicing!";
       remarkColor = "red";
     } else if (playerScore >= 4 && playerScore < 7) {
-      remark = "Average Grades, You can do better.";
+      remark = "Average Grades, You can do better!";
       remarkColor = "orange";
     } else if (playerScore >= 7) {
-      remark = "Excellent, Keep the good work going.";
+      remark = "Excellent, Keep the good work going!";
       remarkColor = "green";
     }
     const playerGrade = (playerScore / 10) * 100;
@@ -297,20 +299,36 @@ export default function QuizContainer(props) {
   return (
     <div>
       {loading ? (
-        <p>loading</p>
-      ) : (
-        <button
-          onClick={() => {
-            setStarted(!started);
-          }}
-        >
-          start
-        </button>
+
+        <p className="overall-container"> <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i></p>
+      ) : ( 
+        <div className="start-quiz-container">
+          {/* If quiz started, display close button, else display start button*/}
+          {started ? ( 
+              <button
+                onClick={() => {
+                  setStarted(!started);
+                }}
+                className="start-quiz"
+              >
+                Close Quiz
+              </button>
+          ) : (
+              <button
+                onClick={() => {
+                  setStarted(!started);
+                }}
+                className="start-quiz"
+              >
+                Start Quiz
+              </button>
+          )}
+        </div>
       )}
 
       {started ? (
         <div>
-          <main>
+          <main className="overall-container">
             <div className="modal-container" id="score-modal">
               <div className="modal-content-container">
                 <h1>Congratulations, Quiz Completed.</h1>
@@ -366,6 +384,21 @@ export default function QuizContainer(props) {
                 <span>
                   <input
                     type="radio"
+                    id="option-zero"
+                    name="option"
+                    className="radio"
+                    value="option0"
+                  />
+                  <label
+                    htmlFor="option-zero"
+                    className="option"
+                    id="option-zero-label"
+                  ></label>
+                </span>
+
+                <span>
+                  <input
+                    type="radio"
                     id="option-one"
                     name="option"
                     className="radio"
@@ -407,21 +440,6 @@ export default function QuizContainer(props) {
                     id="option-three-label"
                   ></label>
                 </span>
-
-                <span>
-                  <input
-                    type="radio"
-                    id="option-four"
-                    name="option"
-                    className="radio"
-                    value="option4"
-                  />
-                  <label
-                    htmlFor="option-four"
-                    className="option"
-                    id="option-four-label"
-                  ></label>
-                </span>
               </div>
 
               <div className="next-button-container">
@@ -431,7 +449,7 @@ export default function QuizContainer(props) {
           </main>
         </div>
       ) : (
-        <p>notstarted</p>
+        <p className="overall-container"></p>
       )}
     </div>
   );

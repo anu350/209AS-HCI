@@ -175,6 +175,17 @@ class MyEditor extends Component {
     this.onChange(RichUtils.toggleCode(this.state.editorState));
   };
 
+  buttonHover = (event) => {
+    event.target.style.backgroundColor = "#abc6fd";
+    event.target.style.transitionDuration = "0.2s";
+    // event.target.style.backgroundColor = "#ebebeb";
+  };
+
+  stopButtonHover = (event) => {
+    event.target.style.backgroundColor = "";
+    // event.target.style.backgroundColor = "";
+  };
+
   render() {
     return (
       <div className="editor-container">
