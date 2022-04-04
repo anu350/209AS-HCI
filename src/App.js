@@ -13,7 +13,7 @@ import React, { useState } from "react";
 import NoteList from "./components/noteEditor/NoteList";
 import TopBar from "./components/TopBar";
 import Settings from "./components/Settings";
-import QuizMenu from "./components/quiz/QuizMenu";
+// import QuizMenu from "./components/quiz/QuizMenu";
 
 function App() {
   const [showSettings, setShowSettings] = useState(false);
@@ -66,22 +66,22 @@ function App() {
           togglequestionmode={togglequestionmode}
         />
       </div>
-      {questionMode ? (
+      {/* {questionMode ? (
         <div style={styles.qmode}>
           <div style={styles.qcontainer}>
             <QuizMenu noteId={currentNoteId} fullnote={currentFullNote} />
           </div>
         </div>
-      ) : (
-        <div style={styles.noteContainer}>
-          <NoteList
-            retrieveId={retrieveId}
-            retrieveFullNote={retrieveFullNote}
-            persistNoteId={currentNoteId}
-            persistFullNote={currentFullNote}
-          />
-        </div>
-      )}
+      ) : ( */}
+      <div style={styles.noteContainer}>
+        <NoteList
+          retrieveId={retrieveId}
+          retrieveFullNote={retrieveFullNote}
+          persistNoteId={currentNoteId}
+          persistFullNote={currentFullNote}
+        />
+      </div>
+
     </div>
   );
 }

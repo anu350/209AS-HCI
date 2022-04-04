@@ -26,7 +26,5 @@ yarn-error.log*
 
 # python
 api/__pycache__/*
-<<<<<<< HEAD
 
-=======
->>>>>>> roy-branch
+data/
